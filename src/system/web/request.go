@@ -13,6 +13,7 @@ func Param(r *http.Request, key string) string {
 	return m[key]
 }
 
+// Query returns the argument value from the query string.
 func Query(r *http.Request, key string) string {
 	return r.URL.Query().Get(key)
 }
@@ -24,9 +25,6 @@ func Query(r *http.Request, key string) string {
 func Decode(r *http.Request, val any) error {
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(val); err != nil {
-		return err
-	}
 
-	return nil
+	return decoder.Decode(val)
 }

@@ -41,18 +41,13 @@ func Errors(log *zap.SugaredLogger) web.Middleware {
 				default:
 					sentry.CaptureException(err)
 
-					// Temprary show up internal error to the user (issue 45-346 requested by Rohi)
-					er = errors.ErrorResponse{
-						Error: err.Error(),
-					}
-
 					er = errors.ErrorResponse{
 						Error: http.StatusText(http.StatusInternalServerError),
 					}
 				}
 
-				if err := web.Respond(ctx, w, er, status); err != nil {
-					return err
+				if errResp := web.Respond(ctx, w, er, status); errResp != nil {
+					return errResp
 				}
 
 				// If we receive the shutdown err we need to return it

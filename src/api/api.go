@@ -10,13 +10,14 @@ import (
 	"go.uber.org/zap"
 )
 
-type APIMuxConfig struct {
+// MuxConfig defines the dependencies for the APIMux
+type MuxConfig struct {
 	Shutdown chan os.Signal
 	Log      *zap.SugaredLogger
 }
 
-// APIMux constructs a http.Handler with all application routes defined.
-func APIMux(cfg APIMuxConfig) http.Handler {
+// Mux constructs a http.Handler with all application routes defined.
+func Mux(cfg MuxConfig) http.Handler {
 	app := web.NewApp(
 		cfg.Shutdown,
 		middleware.Logger(cfg.Log),
@@ -24,6 +25,8 @@ func APIMux(cfg APIMuxConfig) http.Handler {
 		middleware.Metrics(),
 		middleware.Panics(),
 	)
+
+	v1.Swagger(app)
 
 	v1.Routes(app, v1.Config{
 		Log: cfg.Log,

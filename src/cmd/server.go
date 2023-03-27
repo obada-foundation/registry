@@ -46,7 +46,7 @@ func (s *ServerCommand) Execute(_ []string) error {
 		return fmt.Errorf("sentry.Init: %w", err)
 	}
 
-	apiServer := s.makeApiServer(api.APIMuxConfig{
+	apiServer := s.makeAPIServer(api.MuxConfig{
 		Shutdown: shutdown,
 		Log:      s.Logger,
 	})
@@ -68,7 +68,10 @@ func (s *ServerCommand) Execute(_ []string) error {
 		defer cancel()
 
 		if err := apiServer.Shutdown(ctx); err != nil {
-			apiServer.Close()
+			if er := apiServer.Close(); er != nil {
+				err = fmt.Errorf("%w; %v", err, er)
+			}
+
 			return fmt.Errorf("could not stop server gracefully: %w", err)
 		}
 	}
@@ -76,8 +79,8 @@ func (s *ServerCommand) Execute(_ []string) error {
 	return nil
 }
 
-func (s *ServerCommand) makeApiServer(cfg api.APIMuxConfig) *http.Server {
-	apiMux := api.APIMux(cfg)
+func (s *ServerCommand) makeAPIServer(cfg api.MuxConfig) *http.Server {
+	apiMux := api.Mux(cfg)
 
 	return &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", s.Address, s.Port),

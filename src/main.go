@@ -9,7 +9,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"github.com/obada-foundation/registry/cmd"
 	_ "github.com/obada-foundation/registry/db"
-	"github.com/obada-foundation/registry/system/logger"
+	log "github.com/obada-foundation/registry/system/logger"
 	"go.uber.org/zap"
 )
 
@@ -30,21 +30,23 @@ type opts struct {
 func main() {
 	fmt.Printf("DID Registry %s\n(c) OBADA Foundation %d\n\n", revision, time.Now().Year())
 
-	log, err := logger.New("CLIENT-HELPER")
+	logger, err := log.New("CLIENT-HELPER")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	defer log.Sync()
+	defer logger.Sync()
 
 	var o opts
 
-	if err := run(log, &o); err != nil {
-		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
-			os.Exit(0)
-		} else {
-			log.Errorw("startup", "ERROR", err)
-			log.Sync()
+	if err := run(logger, &o); err != nil {
+		if _, ok := err.(*flags.Error); !ok {
+			logger.Errorw("startup", "ERROR", err)
+			if err := logger.Sync(); err != nil {
+				logger.Errorw("startup", "Sync LOG ERROR", err)
+			}
+
+			// nolint
 			os.Exit(1)
 		}
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/dimfeld/httptreemux/v5"
 )
 
+// Handler wrap the http.Handler interface by adding a context paremeter and return type error
 type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) error
 
 // App is the entrypoint into our application and what configures our context
@@ -18,7 +19,6 @@ type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) e
 // data/logic on this App struct.
 type App struct {
 	mux      *httptreemux.ContextMux
-	otmux    http.Handler
 	shutdown chan os.Signal
 	mw       []Middleware
 }
@@ -58,7 +58,7 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Handle sets a handler function for a given HTTP method and path pair
 // to the application server mux.
-func (a *App) Handle(method string, group string, path string, handler Handler, mw ...Middleware) {
+func (a *App) Handle(method, group, path string, handler Handler, mw ...Middleware) {
 	handler = wrapMiddleware(mw, handler)
 	handler = wrapMiddleware(a.mw, handler)
 

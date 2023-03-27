@@ -14,7 +14,7 @@ type Config struct {
 }
 
 // Routes binds all the version 1 routes.
-func Routes(app *web.App, cfg Config) {
+func Routes(app *web.App, _ Config) {
 	const version = "api/v1"
 
 	didGroup := did.Handlers{}

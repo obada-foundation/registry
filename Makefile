@@ -17,7 +17,7 @@ lint:
 	cd src &&  golangci-lint --config .golangci.yml run --print-issued-lines --out-format=github-actions ./...
 
 test:
-	cd src && go test ./... -v
+	cd src && go test ./... -v -cover
 
 vendor:
 	cd src && go mod tidy && go mod vendor

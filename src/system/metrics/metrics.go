@@ -28,6 +28,7 @@ type metrics struct {
 // The metrics value is stored in a package level variable since everything
 // inside of expvar is registered as a singleton. The use of once will make
 // sure this initialization only happens once.
+// nolint
 func init() {
 	m = &metrics{
 		goroutines: expvar.NewInt("goroutines"),

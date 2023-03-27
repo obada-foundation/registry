@@ -11,11 +11,13 @@ import (
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 )
 
+// Validator is a little wrapper around validation package.
 type Validator struct {
 	validate   *validator.Validate
 	translator ut.Translator
 }
 
+// NewValidator returns a new Validator instance.
 func NewValidator() (*Validator, error) {
 	validate := validator.New()
 
@@ -24,7 +26,9 @@ func NewValidator() (*Validator, error) {
 		return nil, fmt.Errorf("cannot find translator for english")
 	}
 
-	en_translations.RegisterDefaultTranslations(validate, translator)
+	if err := en_translations.RegisterDefaultTranslations(validate, translator); err != nil {
+		return nil, err
+	}
 
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
