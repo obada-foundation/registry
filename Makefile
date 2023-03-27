@@ -24,3 +24,7 @@ vendor:
 
 coverage:
 	cd src && go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
+
+swagger:
+	cd src && swag fmt
+	cd src && swag init -g main.go

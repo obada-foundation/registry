@@ -1,0 +1,13 @@
+basePath: /0.1/
+host: registry.obada.io
+info:
+  contact:
+    name: techops@obada.io
+    url: https://www.obada.io
+  title: OBADA DID Registry
+  version: v0.1
+paths: {}
+schemes:
+- https
+- http
+swagger: "2.0"

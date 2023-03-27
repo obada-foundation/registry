@@ -1,0 +1,18 @@
+{
+    "schemes": [
+        "https",
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "title": "OBADA DID Registry",
+        "contact": {
+            "name": "techops@obada.io",
+            "url": "https://www.obada.io"
+        },
+        "version": "v0.1"
+    },
+    "host": "registry.obada.io",
+    "basePath": "/0.1/",
+    "paths": {}
+}
