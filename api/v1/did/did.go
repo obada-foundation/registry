@@ -7,6 +7,7 @@ import (
 
 	"github.com/obada-foundation/registry/system/web"
 	"github.com/obada-foundation/registry/types"
+	"github.com/obada-foundation/sdkgo"
 )
 
 // Handlers contains methods for DID API

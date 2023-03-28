@@ -58,6 +58,12 @@ github.com/leodido/go-urn
 github.com/mailru/easyjson/buffer
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
+# github.com/obada-foundation/sdkgo v0.1.0
+## explicit; go 1.16
+github.com/obada-foundation/sdkgo
+github.com/obada-foundation/sdkgo/base58
+github.com/obada-foundation/sdkgo/hash
+github.com/obada-foundation/sdkgo/properties
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib

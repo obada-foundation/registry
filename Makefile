@@ -14,16 +14,16 @@ docker/build:
 		.
 
 lint:
-	cd src &&  golangci-lint --config .golangci.yml run --print-issued-lines --out-format=github-actions ./...
+	golangci-lint --config .golangci.yml run --print-issued-lines --out-format=github-actions ./...
 
 test:
-	cd src && go test ./... -v -cover
+	go test ./... -v -cover
 
 vendor:
-	cd src && go mod tidy && go mod vendor
+	go mod tidy && go mod vendor
 
 coverage:
-	cd src && go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
+	go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
 
 swagger:
 	cd src && swag fmt

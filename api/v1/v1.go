@@ -19,5 +19,6 @@ func Routes(app *web.App, _ Config) {
 
 	didGroup := did.Handlers{}
 
-	app.Handle(http.MethodPost, version, "/did/register", didGroup.Register)
+	app.Handle(http.MethodPost, version, "/register", didGroup.Register)
+	app.Handle(http.MethodGet, version, "/:did", didGroup.Register)
 }

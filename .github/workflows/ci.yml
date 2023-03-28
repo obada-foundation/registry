@@ -22,14 +22,14 @@ jobs:
           curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $GITHUB_WORKSPACE v1.52.1
           go mod tidy
           go mod vendor
-        working-directory: src
+        working-directory: .
 
       - name: test and lint
         run: |
           go test -race -timeout=60s -covermode=atomic -coverprofile=$GITHUB_WORKSPACE/profile.cov_tmp ./...
           cat $GITHUB_WORKSPACE/profile.cov_tmp | grep -v "_mock.go" > $GITHUB_WORKSPACE/profile.cov
-          $GITHUB_WORKSPACE/golangci-lint --config ${GITHUB_WORKSPACE}/src/.golangci.yml run --print-issued-lines --out-format=github-actions ./...
-        working-directory: src
+          $GITHUB_WORKSPACE/golangci-lint --config ${GITHUB_WORKSPACE}/.golangci.yml run --print-issued-lines --out-format=github-actions ./...
+        working-directory: .
         env:
           GOFLAGS: "-mod=vendor"
           TZ: "America/New_York"
@@ -40,6 +40,6 @@ jobs:
 
       - name: submit coverage
         run: $(go env GOPATH)/bin/goveralls -service="github" -coverprofile=$GITHUB_WORKSPACE/profile.cov
-        working-directory: src
+        working-directory: .
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
