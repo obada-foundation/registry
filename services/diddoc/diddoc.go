@@ -8,7 +8,7 @@ import (
 // DIDDoc defines an API for work with DID documents
 type DIDDoc interface {
 	// Register registers a new DID document in the registry
-	Register(did sdkdid.DID) error
+	Register(did string) error
 }
 
 // Service implements DIDDoc
@@ -24,8 +24,13 @@ func NewService(logger *zap.SugaredLogger) *Service {
 }
 
 // Register implements DIDDoc Register
-func (s Service) Register(did sdkdid.DID) error {
-	s.logger.Debugf("New DID registered", did)
+func (s Service) Register(did string) error {
+	DID, err := sdkdid.FromString(did, nil)
+	if err != nil {
+		return err
+	}
+
+	s.logger.Debugf("New DID registered", DID)
 
 	return nil
 }
