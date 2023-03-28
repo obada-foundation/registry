@@ -11,6 +11,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/obada-foundation/registry/api"
+	"github.com/obada-foundation/registry/services/diddoc"
 	"go.uber.org/zap"
 )
 
@@ -46,9 +47,14 @@ func (s *ServerCommand) Execute(_ []string) error {
 		return fmt.Errorf("sentry.Init: %w", err)
 	}
 
+	didDocSvc := diddoc.NewService(s.Logger)
+
 	apiServer := s.makeAPIServer(api.MuxConfig{
 		Shutdown: shutdown,
 		Log:      s.Logger,
+
+		// Services
+		DIDDoc: didDocSvc,
 	})
 
 	go func() {
