@@ -26,8 +26,6 @@ func Mux(cfg MuxConfig) http.Handler {
 		middleware.Panics(),
 	)
 
-	v1.Swagger(app)
-
 	v1.Routes(app, v1.Config{
 		Log: cfg.Log,
 	})

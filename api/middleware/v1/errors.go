@@ -23,6 +23,7 @@ func Errors(log *zap.SugaredLogger) web.Middleware {
 				var er errors.ErrorResponse
 				var status int
 				switch {
+
 				case validate.IsFieldErrors(err):
 					fieldErrors := validate.GetFieldErrors(err)
 					er = errors.ErrorResponse{
@@ -44,6 +45,7 @@ func Errors(log *zap.SugaredLogger) web.Middleware {
 					er = errors.ErrorResponse{
 						Error: http.StatusText(http.StatusInternalServerError),
 					}
+					status = http.StatusInternalServerError
 				}
 
 				if errResp := web.Respond(ctx, w, er, status); errResp != nil {

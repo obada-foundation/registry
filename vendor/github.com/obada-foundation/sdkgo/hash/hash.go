@@ -1,3 +1,8 @@
+// Package hash provides a Hash struct that represents a string value as a hash or as a decimal.
+// The package also provides functions to create a new Hash struct from a DID string or a byte slice,
+// get the hash string or decimal value from a Hash struct, and compute the sum of given hashes.
+// Please note that some hashing rules (like SumHashes) reprecented here
+// are very specific for OBADA needs and may unsecure for you.
 package hash
 
 import (
@@ -15,10 +20,33 @@ type Hash struct {
 	dec  uint64
 }
 
+// FromString creates hash struct from string sha256
+func FromString(hash string, logger *log.Logger) (Hash, error) {
+	var h Hash
+
+	match, err := regexp.MatchString("^[a-f0-9]{64}$", hash)
+	if err != nil {
+		return h, err
+	}
+
+	if !match {
+		return h, fmt.Errorf("given string is not sha256 hash")
+	}
+
+	hashDec, err := hashToDec(hash, logger)
+	if err != nil {
+		return h, err
+	}
+
+	h.hash = hash
+	h.dec = hashDec
+
+	return h, nil
+}
+
 // NewHash creates a new OBADA hash
-func NewHash(value []byte, logger *log.Logger, debug bool) (Hash, error) {
+func NewHash(value []byte, logger *log.Logger) (Hash, error) {
 	var hash Hash
-	var debugStr string
 
 	h := sha256.New()
 
@@ -28,14 +56,13 @@ func NewHash(value []byte, logger *log.Logger, debug bool) (Hash, error) {
 
 	hashStr := hex.EncodeToString(h.Sum(nil))
 
-	if debug {
+	if logger != nil {
 		logger.Printf("SHA256(%q) -> %q", value, hashStr)
 	}
 
-	hashDec, err := hashToDec(hashStr, logger, debug)
+	hashDec, err := hashToDec(hashStr, logger)
 
 	if err != nil {
-		logger.Println(debugStr)
 		return hash, err
 	}
 
@@ -46,7 +73,7 @@ func NewHash(value []byte, logger *log.Logger, debug bool) (Hash, error) {
 }
 
 // hashToDec convert hash which is hex string into decimal
-func hashToDec(hash string, logger *log.Logger, debug bool) (uint64, error) {
+func hashToDec(hash string, logger *log.Logger) (uint64, error) {
 	match, err := regexp.MatchString(`^[0-9a-fA-F]+$`, hash)
 	partialHash := hash
 
@@ -68,7 +95,7 @@ func hashToDec(hash string, logger *log.Logger, debug bool) (uint64, error) {
 		return 0, err
 	}
 
-	if debug {
+	if logger != nil {
 		logger.Printf("Get8CharsFromHash(%q) -> %q -> Hex2Dec(%q) -> %d", hash, partialHash, partialHash, decimal)
 	}
 
@@ -83,4 +110,31 @@ func (h Hash) GetHash() string {
 // GetDec returns decimal value
 func (h Hash) GetDec() uint64 {
 	return h.dec
+}
+
+// SumHashes returns sum of given hashes
+func SumHashes(logger *log.Logger, hashes ...Hash) uint64 {
+	sum := uint64(0)
+
+	for _, hash := range hashes {
+		sum += hash.GetDec()
+	}
+
+	if logger != nil {
+		var dec []uint64
+
+		for _, hash := range hashes {
+			dec = append(dec, hash.GetDec())
+		}
+
+		logger.Printf(
+			"\n<|%s|> => SumHashes(%v) -> (%v) -> %d",
+			"Computing sum of hashes",
+			hashes,
+			dec,
+			sum,
+		)
+	}
+
+	return sum
 }
