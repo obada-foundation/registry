@@ -11,7 +11,7 @@ import (
 )
 
 func Test_Service(t *testing.T) {
-	logger, _ := testutil.NewTestLoger()
+	logger, deferFn := testutil.NewTestLoger()
 
 	service := diddoc.NewService(logger)
 
@@ -27,17 +27,17 @@ func Test_Service(t *testing.T) {
 			for _, DID := range notSupportedDIDs {
 				err := service.Register(DID)
 				require.ErrorIs(t, err, sdkdid.ErrNotSupportedDIDMethod)
-
 			}
 		}
 
 		t.Logf("\tTest DID registration")
 		{
-			service.Register("did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88)")
+			err := service.Register("did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88")
+			require.NoError(t, err)
 		}
 	}
 
 	defer func() {
-		logger.Sync()
+		deferFn()
 	}()
 }

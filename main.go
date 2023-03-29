@@ -8,7 +8,6 @@ import (
 
 	flags "github.com/jessevdk/go-flags"
 	"github.com/obada-foundation/registry/cmd"
-	_ "github.com/obada-foundation/registry/db"
 	log "github.com/obada-foundation/registry/system/logger"
 	"go.uber.org/zap"
 )

@@ -1,6 +1,7 @@
 package diddoc
 
 import (
+	immudb "github.com/codenotary/immudb/pkg/client"
 	sdkdid "github.com/obada-foundation/sdkgo/did"
 	"go.uber.org/zap"
 )
@@ -13,12 +14,14 @@ type DIDDoc interface {
 
 // Service implements DIDDoc
 type Service struct {
+	db     immudb.ImmuClient
 	logger *zap.SugaredLogger
 }
 
 // NewService creates a new instance of DIDDoc service
-func NewService(logger *zap.SugaredLogger) *Service {
+func NewService(db immudb.ImmuClient, logger *zap.SugaredLogger) *Service {
 	return &Service{
+		db:     db,
 		logger: logger,
 	}
 }

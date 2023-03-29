@@ -19,11 +19,15 @@ linters-settings:
     locale: US
   lll:
     line-length: 140
+    
   gocritic:
     enabled-tags:
+      - diagnostic
       - performance
+      - opinionated
       - style
       - experimental
+      
     disabled-checks:
       - wrapperFunc
       - hugeParam
@@ -33,6 +37,24 @@ linters-settings:
 
 linters:
   enable:
+    # Check for pass []any as any in variadic func(...any).
+    # Rare case but saved me from debugging a few times.
+    - asasalint
+
+    # I prefer plane ASCII identifiers.
+    # Symbol `∆` instead of `delta` looks cool but no thanks.
+    - asciicheck
+
+    # Checks for dangerous unicode character sequences.
+    # Super rare but why not to be a bit paranoid?
+    - bidichk
+
+    # Checks whether HTTP response body is closed successfully.
+    - bodyclose
+
+    # Check whether the function uses a non-inherited context.
+    - contextcheck
+    
     - megacheck
     - revive
     - govet

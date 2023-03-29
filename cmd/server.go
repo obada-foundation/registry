@@ -12,6 +12,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/obada-foundation/registry/api"
 	"github.com/obada-foundation/registry/services/diddoc"
+	"github.com/obada-foundation/registry/system/db"
 	"go.uber.org/zap"
 )
 
@@ -35,6 +36,8 @@ type ServerCommand struct {
 func (s *ServerCommand) Execute(_ []string) error {
 	s.Logger.Infow("startup", "status", "server initialization started")
 
+	ctx := context.Background()
+
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
@@ -47,7 +50,13 @@ func (s *ServerCommand) Execute(_ []string) error {
 		return fmt.Errorf("sentry.Init: %w", err)
 	}
 
-	didDocSvc := diddoc.NewService(s.Logger)
+	db, err := db.NewDBConnection(ctx, db.Connection{})
+	if err != nil {
+		return fmt.Errorf("cannot enstalish connection to immudb: %w", err)
+	}
+	s.Logger.Infow("startup", "status", "immudb connection established")
+
+	didDocSvc := diddoc.NewService(db, s.Logger)
 
 	apiServer := s.makeAPIServer(api.MuxConfig{
 		Shutdown: shutdown,
@@ -70,7 +79,7 @@ func (s *ServerCommand) Execute(_ []string) error {
 		s.Logger.Infow("shutdown", "status", "shutdown started", "signal", sig)
 		defer s.Logger.Infow("shutdown", "status", "shutdown complete", "signal", sig)
 
-		ctx, cancel := context.WithTimeout(context.Background(), s.ShutdownTimeout)
+		ctx, cancel := context.WithTimeout(ctx, s.ShutdownTimeout)
 		defer cancel()
 
 		if err := apiServer.Shutdown(ctx); err != nil {
@@ -79,6 +88,10 @@ func (s *ServerCommand) Execute(_ []string) error {
 			}
 
 			return fmt.Errorf("could not stop server gracefully: %w", err)
+		}
+
+		if err := db.CloseSession(ctx); err != nil {
+			return fmt.Errorf("cannot close db connection: %w", err)
 		}
 	}
 
