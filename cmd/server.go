@@ -21,6 +21,9 @@ type ServerCommand struct {
 	Port    int    `long:"port" env:"SERVER_PORT" default:"80" description:"port"`
 	Address string `long:"address" env:"SERVER_ADDRESS" default:"" description:"listening address"`
 
+	// Database connection
+	DB ImmuDBGroup `group:"db" namespace:"db" env-namespace:"DB"`
+
 	// Timeouts
 	ReadTimeout     time.Duration `long:"read-timeout" env:"READ_TIMEOUT" default:"5s" description:"read timeout"`
 	WriteTimeout    time.Duration `long:"write-timeout" env:"WRITE_TIMEOUT" default:"10s" description:"write timeout"`
@@ -30,6 +33,15 @@ type ServerCommand struct {
 	SentryDSN string `long:"sentry-dsn" env:"SENTRY_DSN" default:"" description:"sentry dsn"`
 
 	CommonOpts
+}
+
+// ImmuDBGroup db connection details
+type ImmuDBGroup struct {
+	Host   string `long:"host" env:"HOST" default:"localhost" description:"immudb host"`
+	Port   int    `long:"port" env:"PORT" default:"3322" description:"immudb port"`
+	User   string `long:"user" env:"USER" default:"immudb" description:"immudb user"`
+	Pass   string `long:"password" env:"PASSWORD" default:"immudb" description:"immudb password"`
+	DBName string `long:"dbname" env:"DB_NAME" default:"defaultdb" description:"immudb database name"`
 }
 
 // Execute is the entry point for "server" command, called by flag parser
@@ -50,7 +62,13 @@ func (s *ServerCommand) Execute(_ []string) error {
 		return fmt.Errorf("sentry.Init: %w", err)
 	}
 
-	dbClient, err := db.NewDBConnection(ctx, db.Connection{})
+	dbClient, err := db.NewDBConnection(ctx, db.Connection{
+		Host:   s.DB.Host,
+		Port:   s.DB.Port,
+		User:   s.DB.User,
+		Pass:   s.DB.Pass,
+		DBName: s.DB.DBName,
+	})
 	if err != nil {
 		return fmt.Errorf("cannot enstalish connection to immudb: %w", err)
 	}

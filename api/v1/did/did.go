@@ -17,6 +17,18 @@ type Handlers struct {
 	DIDDoc diddoc.DIDDoc
 }
 
+// Get DID document from the registry
+func (h Handlers) Get(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	DID := web.Param(r, "did")
+
+	DIDDoc, err := h.DIDDoc.Get(ctx, DID)
+	if err != nil {
+		return err
+	}
+
+	return web.Respond(ctx, w, DIDDoc, http.StatusOK)
+}
+
 // Register DID in the registry
 func (h Handlers) Register(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	var registerDID types.RegisterDID
@@ -33,5 +45,5 @@ func (h Handlers) Register(ctx context.Context, w http.ResponseWriter, r *http.R
 		return apierrors.NewRequestError(err, http.StatusBadRequest)
 	}
 
-	return web.Respond(ctx, w, registerDID, http.StatusOK)
+	return web.RespondWithNoContent(ctx, w, http.StatusCreated)
 }

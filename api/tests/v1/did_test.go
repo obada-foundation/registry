@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/obada-foundation/registry/testutil"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,23 +37,34 @@ func Test_Register(t *testing.T) {
 }
 
 func (dt *DIDTests) registerDID(t *testing.T) {
-	testutil.DumpContainerLogs(c.ID)
+	DID := "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88"
 	t.Log("Register new DID")
+	{
+		req := `{"did": "` + DID + `"}`
 
-	req := `{"did": "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88"}`
+		resp, err := testutil.Post(t, dt.srv.URL+"/api/v1.0/register", req, nil)
+		require.NoError(t, err)
+		require.NoError(t, resp.Body.Close())
 
-	resp, err := testutil.Post(t, dt.srv.URL+"/api/v1/register", req, nil)
-	require.NoError(t, err)
+		require.Equal(t, http.StatusCreated, resp.StatusCode)
+	}
+	t.Log("Get newly registered DID")
+	{
+		resp, err := testutil.Get(t, dt.srv.URL+"/api/v1.0/"+DID, nil)
+		require.NoError(t, err)
 
-	b, err := io.ReadAll(resp.Body)
-	require.NoError(t, err)
+		require.Equal(t, http.StatusOK, resp.StatusCode)
 
-	require.Equal(t, http.StatusOK, resp.StatusCode)
-	require.NoError(t, resp.Body.Close())
+		b, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		require.NoError(t, resp.Body.Close())
 
-	c := JSON{}
-	err = json.Unmarshal(b, &c)
-	require.NoError(t, err)
+		c := JSON{}
+		err = json.Unmarshal(b, &c)
+		require.NoError(t, err)
+
+		assert.Equal(t, DID, c["id"])
+	}
 }
 
 func (dt *DIDTests) notSuportedDIDsRegister(t *testing.T) {
@@ -64,7 +76,7 @@ func (dt *DIDTests) notSuportedDIDsRegister(t *testing.T) {
 	}
 
 	for _, req := range notSupportedDIDs {
-		resp, err := testutil.Post(t, dt.srv.URL+"/api/v1/register", req, nil)
+		resp, err := testutil.Post(t, dt.srv.URL+"/api/v1.0/register", req, nil)
 		require.NoError(t, err)
 
 		b, err := io.ReadAll(resp.Body)

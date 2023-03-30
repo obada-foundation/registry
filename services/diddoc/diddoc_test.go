@@ -9,6 +9,7 @@ import (
 	"github.com/obada-foundation/registry/system/db"
 	"github.com/obada-foundation/registry/testutil"
 	sdkdid "github.com/obada-foundation/sdkgo/did"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -54,8 +55,10 @@ func Test_Service(t *testing.T) {
 
 		t.Logf("\tTest DIDDoc fetching")
 		{
-			err := service.Get(ctx, DID)
+			DIDDoc, err := service.Get(ctx, DID)
 			require.NoError(t, err)
+
+			assert.Equal(t, DID, DIDDoc.ID)
 		}
 	}
 

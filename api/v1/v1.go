@@ -19,12 +19,12 @@ type Config struct {
 
 // Routes binds all the version 1 routes.
 func Routes(app *web.App, cfg Config) {
-	const version = "api/v1"
+	const version = "api/v1.0"
 
 	didGroup := did.Handlers{
 		DIDDoc: cfg.DIDDoc,
 	}
 
 	app.Handle(http.MethodPost, version, "/register", didGroup.Register)
-	app.Handle(http.MethodGet, version, "/:did", didGroup.Register)
+	app.Handle(http.MethodGet, version, "/:did", didGroup.Get)
 }

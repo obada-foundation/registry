@@ -1,9 +1,13 @@
 package diddoc
 
 import (
+	"bytes"
 	"context"
+	"encoding/gob"
 
 	immudb "github.com/codenotary/immudb/pkg/client"
+	"github.com/obada-foundation/registry/system/encoder"
+	"github.com/obada-foundation/registry/types"
 	sdkdid "github.com/obada-foundation/sdkgo/did"
 	"go.uber.org/zap"
 )
@@ -14,7 +18,7 @@ type DIDDoc interface {
 	Register(ctx context.Context, did string) error
 
 	// Get retrieves a DID document from the registry
-	Get(ctx context.Context, did string) error
+	Get(ctx context.Context, did string) (types.DIDDocument, error)
 }
 
 // Service implements DIDDoc
@@ -38,7 +42,14 @@ func (s Service) Register(ctx context.Context, did string) error {
 		return err
 	}
 
-	_, err = s.db.Set(ctx, []byte(DID.String()), []byte("Foo"))
+	gobData, err := encoder.DataEncode(types.DIDDocument{
+		ID: DID.String(),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.Set(ctx, []byte(DID.String()), gobData)
 	if err != nil {
 		return err
 	}
@@ -49,11 +60,18 @@ func (s Service) Register(ctx context.Context, did string) error {
 }
 
 // Get implements DIDDoc Get
-func (s Service) Get(ctx context.Context, did string) error {
-	_, err := s.db.Get(ctx, []byte(did))
+func (s Service) Get(ctx context.Context, did string) (types.DIDDocument, error) {
+	var DIDDoc types.DIDDocument
+
+	entry, err := s.db.Get(ctx, []byte(did))
 	if err != nil {
-		return err
+		return DIDDoc, err
 	}
 
-	return nil
+	dec := gob.NewDecoder(bytes.NewBuffer(entry.Value))
+	if err := dec.Decode(&DIDDoc); err != nil {
+		return DIDDoc, err
+	}
+
+	return DIDDoc, nil
 }
