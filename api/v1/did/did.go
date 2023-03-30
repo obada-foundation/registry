@@ -25,7 +25,7 @@ func (h Handlers) Register(ctx context.Context, w http.ResponseWriter, r *http.R
 		return fmt.Errorf("unable to decode request data: %w", err)
 	}
 
-	if err := h.DIDDoc.Register(registerDID.DID); err != nil {
+	if err := h.DIDDoc.Register(ctx, registerDID.DID); err != nil {
 		if err != sdkdid.ErrNotSupportedDIDMethod {
 			return fmt.Errorf("cannot create DID from string: %w", err)
 		}

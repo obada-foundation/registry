@@ -50,13 +50,13 @@ func (s *ServerCommand) Execute(_ []string) error {
 		return fmt.Errorf("sentry.Init: %w", err)
 	}
 
-	db, err := db.NewDBConnection(ctx, db.Connection{})
+	dbClient, err := db.NewDBConnection(ctx, db.Connection{})
 	if err != nil {
 		return fmt.Errorf("cannot enstalish connection to immudb: %w", err)
 	}
 	s.Logger.Infow("startup", "status", "immudb connection established")
 
-	didDocSvc := diddoc.NewService(db, s.Logger)
+	didDocSvc := diddoc.NewService(dbClient, s.Logger)
 
 	apiServer := s.makeAPIServer(api.MuxConfig{
 		Shutdown: shutdown,
@@ -79,10 +79,10 @@ func (s *ServerCommand) Execute(_ []string) error {
 		s.Logger.Infow("shutdown", "status", "shutdown started", "signal", sig)
 		defer s.Logger.Infow("shutdown", "status", "shutdown complete", "signal", sig)
 
-		ctx, cancel := context.WithTimeout(ctx, s.ShutdownTimeout)
+		shutDownCtx, cancel := context.WithTimeout(ctx, s.ShutdownTimeout)
 		defer cancel()
 
-		if err := apiServer.Shutdown(ctx); err != nil {
+		if err := apiServer.Shutdown(shutDownCtx); err != nil {
 			if er := apiServer.Close(); er != nil {
 				err = fmt.Errorf("%w; %v", err, er)
 			}
@@ -90,7 +90,7 @@ func (s *ServerCommand) Execute(_ []string) error {
 			return fmt.Errorf("could not stop server gracefully: %w", err)
 		}
 
-		if err := db.CloseSession(ctx); err != nil {
+		if err := dbClient.CloseSession(shutDownCtx); err != nil {
 			return fmt.Errorf("cannot close db connection: %w", err)
 		}
 	}

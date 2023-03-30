@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"net"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
@@ -13,6 +13,7 @@ import (
 type Container struct {
 	ID   string
 	Host string // IP:Port
+	Port int
 }
 
 // StartContainer starts the specified container for running tests.
@@ -36,9 +37,17 @@ func StartContainer(image, port string, args ...string) (*Container, error) {
 		return nil, fmt.Errorf("could not extract ip/port: %w", err)
 	}
 
+	portInt, err := strconv.Atoi(hostPort)
+	if err != nil {
+		// nolint
+		StopContainer(id)
+		return nil, fmt.Errorf("could not extract ip/port: %w", err)
+	}
+
 	c := Container{
 		ID:   id,
-		Host: net.JoinHostPort(hostIP, hostPort),
+		Host: hostIP,
+		Port: portInt,
 	}
 
 	return &c, nil

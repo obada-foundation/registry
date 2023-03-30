@@ -2,18 +2,32 @@
 package diddoc_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/obada-foundation/registry/services/diddoc"
+	"github.com/obada-foundation/registry/system/db"
 	"github.com/obada-foundation/registry/testutil"
 	sdkdid "github.com/obada-foundation/sdkgo/did"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_Service(t *testing.T) {
+	c, err := testutil.StartDB()
 	logger, deferFn := testutil.NewTestLoger()
 
-	service := diddoc.NewService(logger)
+	ctx := context.Background()
+
+	dbClient, err := db.NewDBConnection(ctx, db.Connection{
+		Host:   c.Host,
+		Port:   c.Port,
+		User:   "immudb",
+		Pass:   "immudb",
+		DBName: "defaultdb",
+	})
+	require.NoError(t, err)
+
+	service := diddoc.NewService(dbClient, logger)
 
 	t.Logf("Test \"Register\" function")
 	{
@@ -25,14 +39,22 @@ func Test_Service(t *testing.T) {
 			}
 
 			for _, DID := range notSupportedDIDs {
-				err := service.Register(DID)
+				err := service.Register(ctx, DID)
 				require.ErrorIs(t, err, sdkdid.ErrNotSupportedDIDMethod)
 			}
 		}
 
+		DID := "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88"
+
 		t.Logf("\tTest DID registration")
 		{
-			err := service.Register("did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88")
+			err := service.Register(ctx, DID)
+			require.NoError(t, err)
+		}
+
+		t.Logf("\tTest DIDDoc fetching")
+		{
+			err := service.Get(ctx, DID)
 			require.NoError(t, err)
 		}
 	}
