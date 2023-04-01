@@ -2,7 +2,7 @@
   <img class="logo" src="https://www.obada.io/assets/logo/obada-logo-light.svg" alt="OBADA | Registry"/>
 </div>
 
-The “registry”, is DID Registry implementation for OBADA protocol.
+The “registry”, is DID registry implementation for OBADA protocol based on [immudb](https://github.com/codenotary) and S3 protocol.
 
 ---
 
