@@ -18,7 +18,7 @@ import (
 
 // ServerCommand with command line flags and env vars
 type ServerCommand struct {
-	Port    int    `long:"port" env:"SERVER_PORT" default:"80" description:"port"`
+	Port    int    `long:"port" env:"SERVER_PORT" default:"2017" description:"port"`
 	Address string `long:"address" env:"SERVER_ADDRESS" default:"" description:"listening address"`
 
 	// Database connection
@@ -41,7 +41,7 @@ type ImmuDBGroup struct {
 	Port   int    `long:"port" env:"PORT" default:"3322" description:"immudb port"`
 	User   string `long:"user" env:"USER" default:"immudb" description:"immudb user"`
 	Pass   string `long:"password" env:"PASSWORD" default:"immudb" description:"immudb password"`
-	DBName string `long:"dbname" env:"DB_NAME" default:"defaultdb" description:"immudb database name"`
+	DBName string `long:"dbname" env:"NAME" default:"defaultdb" description:"immudb database name"`
 }
 
 // Execute is the entry point for "server" command, called by flag parser
