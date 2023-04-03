@@ -10,6 +10,7 @@ import (
 	"github.com/obada-foundation/registry/system/web"
 )
 
+// Registered middleware prevents requests if DID in request was not registered
 func Registered(svc diddoc.DIDDoc) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {

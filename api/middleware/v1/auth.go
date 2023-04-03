@@ -1,8 +1,11 @@
 package v1
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	apierrors "github.com/obada-foundation/registry/api/errors"
@@ -11,16 +14,25 @@ import (
 	"github.com/obada-foundation/registry/types"
 )
 
+// Authenticate middleware checks signature and verifies that it is valid for the given DID
 func Authenticate(svc diddoc.DIDDoc) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 			if r.Method == http.MethodPost {
-				var req map[string]string
+				var req map[string]interface{}
 
 				DID := web.Param(r, "did")
 
-				if err := web.Decode(r, &req); err != nil {
-					return fmt.Errorf("unable to decode request data: %w", err)
+				body, err := ioutil.ReadAll(r.Body)
+				if err != nil {
+					return err
+				}
+				_ = r.Body.Close()
+				r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
+				buf := bytes.NewBuffer(body)
+				if er := json.NewDecoder(buf).Decode(&req); er != nil {
+					return fmt.Errorf("unable to decode request data: %w", er)
 				}
 
 				signature, ok := req["signature"]

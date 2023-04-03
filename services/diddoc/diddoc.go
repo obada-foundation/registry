@@ -25,7 +25,7 @@ type DIDDoc interface {
 	// GetMetadataHistory returns the history of asset data changes
 	GetMetadataHistory(ctx context.Context, did string) (asset.DataArrayVersions, error)
 
-	//SaveMetadata saves metadata to the registry
+	// SaveMetadata saves metadata to the registry
 	SaveMetadata(ctx context.Context, did string, m []asset.Object) error
 }
 

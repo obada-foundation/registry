@@ -9,15 +9,22 @@ import (
 
 	"github.com/obada-foundation/registry/services/diddoc"
 	"github.com/obada-foundation/registry/types"
+	"github.com/obada-foundation/sdkgo/asset"
 )
 
 // Client is allows to query the registry
 type Client interface {
 	// Register a DID with the registry
-	Register(DID string) error
+	Register(newDID types.RegisterDID) error
 
 	// Get a DID document from the registry
 	Get(DID string) (types.DIDDocument, error)
+
+	// GetMetadataHistory returns the history of changes of asset data
+	GetMetadataHistory(DID string)
+
+	// SaveMetadata saves the asset metadata to the regostry
+	SaveMetadata(DID string, md types.SaveMetadata) error
 }
 
 // HTTPClient is a client for the registry API
@@ -59,6 +66,53 @@ func (c *HTTPClient) Register(newDID types.RegisterDID) error {
 	}
 
 	return nil
+}
+
+// SaveMetadata implements Client.SaveMetadata
+func (c *HTTPClient) SaveMetadata(did string, md types.SaveMetadata) error {
+	b, err := json.Marshal(md)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.h.Post(c.url+"/api/v1.0/"+did+"/metadata", "application/json", bytes.NewBuffer(b))
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("failed to save metadata: %w", err)
+		}
+		_ = resp.Body.Close()
+
+		return fmt.Errorf("failed to save metadata: %q", string(b))
+	}
+
+	return nil
+}
+
+// GetMetadataHistory implements Client.GetMetadataHistory
+func (c *HTTPClient) GetMetadataHistory(did string) (asset.DataArrayVersions, error) {
+	var history asset.DataArrayVersions
+
+	resp, err := c.h.Get(c.url + "/api/v1.0/" + did + "/metadata-history")
+	if err != nil {
+		return history, err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return history, diddoc.ErrDIDNotRegitered
+	}
+
+	dec := json.NewDecoder(resp.Body)
+	if err := dec.Decode(&history); err != nil {
+		return history, err
+	}
+	_ = resp.Body.Close()
+
+	return history, nil
 }
 
 // Get implements Client.Get

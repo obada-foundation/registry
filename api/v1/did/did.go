@@ -50,7 +50,23 @@ func (h Handlers) Register(ctx context.Context, w http.ResponseWriter, r *http.R
 
 // SaveMetadata updates metadata for DID
 func (h Handlers) SaveMetadata(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	return nil
+	DID := web.Param(r, "did")
+
+	var saveMd types.SaveMetadata
+
+	if err := web.Decode(r, &saveMd); err != nil {
+		return fmt.Errorf("unable to decode request data: %w", err)
+	}
+
+	if err := h.DIDDoc.SaveMetadata(ctx, DID, saveMd.Objects); err != nil {
+		if err != sdkdid.ErrNotSupportedDIDMethod {
+			return fmt.Errorf("cannot create DID from string: %w", err)
+		}
+
+		return apierrors.NewRequestError(err, http.StatusBadRequest)
+	}
+
+	return web.RespondWithNoContent(ctx, w, http.StatusOK)
 }
 
 // GetMetadataHistory returns historical records of metadata changes

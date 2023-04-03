@@ -5,6 +5,9 @@ import (
 )
 
 var (
-	ErrUnauthorized            = errors.New("unauthorized")
+	// ErrUnauthorized throws when lack of permissions
+	ErrUnauthorized = errors.New("unauthorized")
+
+	// ErrUnauthorizedNoSignature throws when request has not signature field
 	ErrUnauthorizedNoSignature = errors.New("unauthorized, no signature")
 )
