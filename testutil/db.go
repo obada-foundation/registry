@@ -16,7 +16,7 @@ func StartDB() (*Container, error) {
 		return nil, fmt.Errorf("starting container: %w", err)
 	}
 
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 
 	fmt.Printf("Image:       %s\n", image)
 	fmt.Printf("ContainerID: %s\n", c.ID)

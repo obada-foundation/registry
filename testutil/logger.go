@@ -1,4 +1,3 @@
-// nolint
 package testutil
 
 import (
@@ -11,6 +10,7 @@ import (
 )
 
 // NewTestLoger creates a new logger for testing.
+// nolint
 func NewTestLoger() (*zap.SugaredLogger, func()) {
 	var buf bytes.Buffer
 	encoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
@@ -21,9 +21,9 @@ func NewTestLoger() (*zap.SugaredLogger, func()) {
 	).Sugar()
 
 	return logger, func() {
-		logger.Sync()
+		_ = logger.Sync()
 
-		writer.Flush()
+		_ = writer.Flush()
 		fmt.Println("******************** LOGS ********************")
 		fmt.Print(buf.String())
 		fmt.Println("******************** LOGS ********************")

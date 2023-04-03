@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/obada-foundation/registry/services/diddoc"
 	"github.com/obada-foundation/registry/types"
 )
 
@@ -67,6 +68,10 @@ func (c *HTTPClient) Get(did string) (types.DIDDocument, error) {
 	resp, err := c.h.Get(c.url + "/api/v1.0/" + did)
 	if err != nil {
 		return doc, err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return doc, diddoc.ErrDIDNotRegitered
 	}
 
 	dec := json.NewDecoder(resp.Body)
