@@ -43,5 +43,9 @@ coverage:
 	go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
 
 swagger:
-	cd src && swag fmt
-	cd src && swag init -g main.go
+	swag fmt
+	swag init -g main.go
+
+mockgen:
+	./scripts/mockgen.sh
+.PHONY: vendor

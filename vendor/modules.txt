@@ -94,6 +94,9 @@ github.com/go-playground/universal-translator
 ## explicit; go 1.18
 github.com/go-playground/validator/v10
 github.com/go-playground/validator/v10/translations/en
+# github.com/golang/mock v1.6.0
+## explicit; go 1.11
+github.com/golang/mock/gomock
 # github.com/golang/protobuf v1.5.3
 ## explicit; go 1.9
 github.com/golang/protobuf/descriptor
@@ -128,8 +131,8 @@ github.com/hashicorp/hcl/hcl/token
 github.com/hashicorp/hcl/json/parser
 github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
-# github.com/inconshreveable/mousetrap v1.0.0
-## explicit
+# github.com/inconshreveable/mousetrap v1.0.1
+## explicit; go 1.18
 github.com/inconshreveable/mousetrap
 # github.com/jessevdk/go-flags v1.5.0
 ## explicit; go 1.15
@@ -157,8 +160,9 @@ github.com/mitchellh/mapstructure
 # github.com/o1egl/paseto v1.0.0
 ## explicit
 github.com/o1egl/paseto
-# github.com/obada-foundation/sdkgo v0.0.0-20230323004230-121de07419d4
+# github.com/obada-foundation/sdkgo v0.0.0-20230402211330-1133bdbbd988
 ## explicit; go 1.18
+github.com/obada-foundation/sdkgo/asset
 github.com/obada-foundation/sdkgo/base58
 github.com/obada-foundation/sdkgo/did
 github.com/obada-foundation/sdkgo/hash
@@ -212,8 +216,8 @@ github.com/spf13/afero/mem
 # github.com/spf13/cast v1.5.0
 ## explicit; go 1.18
 github.com/spf13/cast
-# github.com/spf13/cobra v1.2.1
-## explicit; go 1.14
+# github.com/spf13/cobra v1.6.1
+## explicit; go 1.15
 github.com/spf13/cobra
 # github.com/spf13/jwalterweatherman v1.1.0
 ## explicit

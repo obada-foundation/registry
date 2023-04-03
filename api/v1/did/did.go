@@ -31,13 +31,13 @@ func (h Handlers) Get(ctx context.Context, w http.ResponseWriter, r *http.Reques
 
 // Register DID in the registry
 func (h Handlers) Register(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	var registerDID types.RegisterDID
+	var regDID types.RegisterDID
 
-	if err := web.Decode(r, &registerDID); err != nil {
+	if err := web.Decode(r, &regDID); err != nil {
 		return fmt.Errorf("unable to decode request data: %w", err)
 	}
 
-	if err := h.DIDDoc.Register(ctx, registerDID.DID); err != nil {
+	if err := h.DIDDoc.Register(ctx, regDID.DID, regDID.VerificationMethod, regDID.Authentication); err != nil {
 		if err != sdkdid.ErrNotSupportedDIDMethod {
 			return fmt.Errorf("cannot create DID from string: %w", err)
 		}
@@ -46,4 +46,37 @@ func (h Handlers) Register(ctx context.Context, w http.ResponseWriter, r *http.R
 	}
 
 	return web.RespondWithNoContent(ctx, w, http.StatusCreated)
+}
+
+// SaveMetadata updates metadata for DID
+func (h Handlers) SaveMetadata(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	DID := web.Param(r, "did")
+
+	var saveMd types.SaveMetadata
+
+	if err := web.Decode(r, &saveMd); err != nil {
+		return fmt.Errorf("unable to decode request data: %w", err)
+	}
+
+	if err := h.DIDDoc.SaveMetadata(ctx, DID, saveMd.Objects); err != nil {
+		if err != sdkdid.ErrNotSupportedDIDMethod {
+			return fmt.Errorf("cannot create DID from string: %w", err)
+		}
+
+		return apierrors.NewRequestError(err, http.StatusBadRequest)
+	}
+
+	return web.RespondWithNoContent(ctx, w, http.StatusOK)
+}
+
+// GetMetadataHistory returns historical records of metadata changes
+func (h Handlers) GetMetadataHistory(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	DID := web.Param(r, "did")
+
+	history, err := h.DIDDoc.GetMetadataHistory(ctx, DID)
+	if err != nil {
+		return err
+	}
+
+	return web.Respond(ctx, w, history, http.StatusOK)
 }
