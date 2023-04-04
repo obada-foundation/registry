@@ -137,7 +137,7 @@ func (s Service) Get(ctx context.Context, did string) (types.DIDDocument, error)
 	entry, err := s.db.Get(ctx, []byte(did))
 	if err != nil {
 		if strings.Contains(err.Error(), "key not found") {
-			return DIDDoc, ErrDIDNotRegitered
+			return DIDDoc, ErrDIDNotRegistered
 		}
 
 		return DIDDoc, err

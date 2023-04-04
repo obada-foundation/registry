@@ -125,7 +125,7 @@ func (c *HTTPClient) Get(did string) (types.DIDDocument, error) {
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		return doc, diddoc.ErrDIDNotRegitered
+		return doc, diddoc.ErrDIDNotRegistered
 	}
 
 	dec := json.NewDecoder(resp.Body)

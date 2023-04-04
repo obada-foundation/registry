@@ -17,7 +17,7 @@ func Registered(svc diddoc.DIDDoc) web.Middleware {
 			DID := web.Param(r, "did")
 
 			if _, err := svc.Get(ctx, DID); err != nil {
-				if errors.Is(err, diddoc.ErrDIDNotRegitered) {
+				if errors.Is(err, diddoc.ErrDIDNotRegistered) {
 					return apierrors.NewRequestError(err, http.StatusNotFound)
 				}
 

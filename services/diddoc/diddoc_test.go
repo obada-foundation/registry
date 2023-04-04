@@ -103,7 +103,7 @@ func Test_Service(t *testing.T) {
 		}
 		t.Log("Test to query not registered DID")
 		_, err := service.Get(ctx, "64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb84")
-		require.ErrorIs(t, err, diddoc.ErrDIDNotRegitered)
+		require.ErrorIs(t, err, diddoc.ErrDIDNotRegistered)
 	}
 
 	t.Logf("Test \"SaveMetadata\" function")

@@ -201,7 +201,7 @@ func DID404(t *testing.T, resp *http.Response) {
 	err = json.Unmarshal(b, &c)
 	require.NoError(t, err)
 
-	assert.Equal(t, diddoc.ErrDIDNotRegitered.Error(), c["error"])
+	assert.Equal(t, diddoc.ErrDIDNotRegistered.Error(), c["error"])
 }
 
 func Unauthorized401(t *testing.T, resp *http.Response, err error) {
