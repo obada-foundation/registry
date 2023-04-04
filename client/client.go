@@ -21,7 +21,7 @@ type Client interface {
 	Get(DID string) (types.DIDDocument, error)
 
 	// GetMetadataHistory returns the history of changes of asset data
-	GetMetadataHistory(DID string)
+	GetMetadataHistory(DID string) (asset.DataArrayVersions, error)
 
 	// SaveMetadata saves the asset metadata to the regostry
 	SaveMetadata(DID string, md types.SaveMetadata) error
@@ -103,7 +103,7 @@ func (c *HTTPClient) GetMetadataHistory(did string) (asset.DataArrayVersions, er
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		return history, diddoc.ErrDIDNotRegitered
+		return history, diddoc.ErrDIDNotRegistered
 	}
 
 	dec := json.NewDecoder(resp.Body)
