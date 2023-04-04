@@ -9,6 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	types "github.com/obada-foundation/registry/types"
+	asset "github.com/obada-foundation/sdkgo/asset"
 )
 
 // MockClient is a mock of Client interface.
@@ -50,9 +51,12 @@ func (mr *MockClientMockRecorder) Get(DID interface{}) *gomock.Call {
 }
 
 // GetMetadataHistory mocks base method.
-func (m *MockClient) GetMetadataHistory(DID string) {
+func (m *MockClient) GetMetadataHistory(DID string) (asset.DataArrayVersions, error) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "GetMetadataHistory", DID)
+	ret := m.ctrl.Call(m, "GetMetadataHistory", DID)
+	ret0, _ := ret[0].(asset.DataArrayVersions)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetMetadataHistory indicates an expected call of GetMetadataHistory.
