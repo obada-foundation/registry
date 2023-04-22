@@ -29,7 +29,7 @@ func Test_Service(t *testing.T) {
 
 	ctx := context.Background()
 
-	dbClient, deferFn := services.MakeDBClient(t, ctx)
+	dbClient, deferFn := services.MakeDBClient(ctx, t)
 	defer deferFn()
 
 	service := diddoc.NewService(dbClient, logger)

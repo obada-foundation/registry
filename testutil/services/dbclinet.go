@@ -11,7 +11,8 @@ import (
 )
 
 // MakeDBClient heler func that creates immudb client
-func MakeDBClient(t *testing.T, ctx context.Context) (client.ImmuClient, func()) {
+// nolint: gocritic // no needed named vars in return
+func MakeDBClient(ctx context.Context, t *testing.T) (client.ImmuClient, func()) {
 	c, err := testutil.StartDB()
 	require.NoError(t, err)
 
