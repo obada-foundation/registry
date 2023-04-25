@@ -1,0 +1,74 @@
+syntax = "proto3";
+package v1.diddoc;
+
+option go_package = "github.com/obada-foundation/registry/services/v1/diddoc";
+
+import "google/api/annotations.proto";
+import "v1/diddoc/did_document.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+message RegisterRequest {
+  string did = 1;
+  repeated VerificationMethod verification_method = 2;
+  repeated string authentication = 3;
+  repeated Service service = 4;
+}
+
+message RegisterResponse {}
+
+message GetRequest {
+  string did = 1;
+}
+
+message GetResponse {
+  DIDDocument document = 1;
+}
+
+message GetMetadataHistoryRequest {
+  string did = 1;
+}
+
+message GetMetadataHistoryResponse {
+  map<int32, DataArray> metadata_history = 1;
+}
+
+message SaveMetadataRequest {
+  message Data {
+    string did = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    field_configuration: {path_param_name: "did"},
+  }];
+    repeated Object objects = 2;
+  }
+  bytes signature = 1;
+  Data data = 2;
+}
+
+message SaveMetadataResponse {}
+
+service DIDDoc {
+  rpc Register (RegisterRequest) returns (RegisterResponse) {
+    option (google.api.http) = {
+      post: "/api/v1.0/diddoc/register"
+      body: "*"
+    };
+  }
+
+  rpc Get (GetRequest) returns (GetResponse) {
+    option (google.api.http) = {
+      get: "/api/v1.0/diddoc/{did}"
+    };
+  }
+
+  rpc GetMetadataHistory (GetMetadataHistoryRequest) returns (GetMetadataHistoryResponse) {
+    option (google.api.http) = {
+      get: "/api/v1.0/diddoc/{did}/history"
+    };
+  }
+
+  rpc SaveMetadata (SaveMetadataRequest) returns (SaveMetadataResponse) {
+    option (google.api.http) = {
+      post: "/api/v1.0/diddoc/{data.did}/metadata"
+      body: "*"
+    };
+  }
+}

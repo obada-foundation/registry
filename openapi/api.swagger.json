@@ -1,0 +1,551 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "OBADA DID Registry API",
+    "version": "version not set",
+    "contact": {
+      "name": "Andrii Tarykin",
+      "email": "techops@obada.io"
+    }
+  },
+  "tags": [
+    {
+      "name": "Account"
+    },
+    {
+      "name": "DIDDoc"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1.0/accounts/register": {
+      "post": {
+        "operationId": "Account_RegisterAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accountRegisterAccountResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/accountRegisterAccountRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Account"
+        ]
+      }
+    },
+    "/api/v1.0/accounts/{address}": {
+      "get": {
+        "operationId": "Account_GetPublicKey",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accountGetPublicKeyResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Account"
+        ]
+      }
+    },
+    "/api/v1.0/diddoc/register": {
+      "post": {
+        "operationId": "DIDDoc_Register",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/diddocRegisterResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/diddocRegisterRequest"
+            }
+          }
+        ],
+        "tags": [
+          "DIDDoc"
+        ]
+      }
+    },
+    "/api/v1.0/diddoc/{did}": {
+      "get": {
+        "operationId": "DIDDoc_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/diddocGetResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "did",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DIDDoc"
+        ]
+      }
+    },
+    "/api/v1.0/diddoc/{did}/history": {
+      "get": {
+        "operationId": "DIDDoc_GetMetadataHistory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/diddocGetMetadataHistoryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "did",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DIDDoc"
+        ]
+      }
+    },
+    "/api/v1.0/diddoc/{did}/metadata": {
+      "post": {
+        "operationId": "DIDDoc_SaveMetadata",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/diddocSaveMetadataResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "did",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "signature": {
+                  "type": "string",
+                  "format": "byte"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/diddocObject"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DIDDoc"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "SaveMetadataRequestData": {
+      "type": "object",
+      "properties": {
+        "did": {
+          "type": "string"
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/diddocObject"
+          }
+        }
+      }
+    },
+    "accountGetPublicKeyResponse": {
+      "type": "object",
+      "properties": {
+        "pubkey": {
+          "type": "string"
+        }
+      }
+    },
+    "accountRegisterAccountRequest": {
+      "type": "object",
+      "properties": {
+        "pubkey": {
+          "type": "string"
+        }
+      }
+    },
+    "accountRegisterAccountResponse": {
+      "type": "object"
+    },
+    "diddocDIDDocument": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "controller": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "verificationMethod": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/diddocVerificationMethod"
+          }
+        },
+        "authentication": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "assertionMethod": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "capabilityInvocation": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "capabilityDelegation": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "keyAgreement": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "service": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/diddocService"
+          }
+        },
+        "alsoKnownAs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metadata": {
+          "$ref": "#/definitions/diddocMetadata"
+        }
+      }
+    },
+    "diddocDataArray": {
+      "type": "object",
+      "properties": {
+        "versionHash": {
+          "type": "string"
+        },
+        "rootHash": {
+          "type": "string"
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/diddocObject"
+          }
+        }
+      }
+    },
+    "diddocGetMetadataHistoryResponse": {
+      "type": "object",
+      "properties": {
+        "metadataHistory": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/diddocDataArray"
+          }
+        }
+      }
+    },
+    "diddocGetResponse": {
+      "type": "object",
+      "properties": {
+        "document": {
+          "$ref": "#/definitions/diddocDIDDocument"
+        }
+      }
+    },
+    "diddocMetadata": {
+      "type": "object",
+      "properties": {
+        "versionId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "versionHash": {
+          "type": "string"
+        },
+        "rootHash": {
+          "type": "string"
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/diddocObject"
+          }
+        }
+      }
+    },
+    "diddocObject": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "hashEncryptedDataObject": {
+          "type": "string"
+        },
+        "hashUnencryptedObject": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "hashUnencryptedMetadata": {
+          "type": "string"
+        },
+        "hashEncryptedMetadata": {
+          "type": "string"
+        },
+        "dataObjectHash": {
+          "type": "string"
+        }
+      }
+    },
+    "diddocRegisterRequest": {
+      "type": "object",
+      "properties": {
+        "did": {
+          "type": "string"
+        },
+        "verificationMethod": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/diddocVerificationMethod"
+          }
+        },
+        "authentication": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "service": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/diddocService"
+          }
+        }
+      }
+    },
+    "diddocRegisterResponse": {
+      "type": "object"
+    },
+    "diddocSaveMetadataResponse": {
+      "type": "object"
+    },
+    "diddocService": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "serviceEndpoint": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "diddocVerificationMethod": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "controller": {
+          "type": "string"
+        },
+        "publicKeyJwk": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "publicKeyMultibase": {
+          "type": "string"
+        },
+        "publicKeyBase58": {
+          "type": "string"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

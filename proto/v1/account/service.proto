@@ -1,0 +1,36 @@
+syntax = "proto3";
+package v1.account;
+
+option go_package = "github.com/obada-foundation/registry/services/v1/account";
+
+import "google/api/annotations.proto";
+
+message RegisterAccountRequest {
+  string pubkey = 1;
+}
+
+message RegisterAccountResponse {
+}
+
+message GetPublicKeyRequest {
+  string address = 1;
+}
+
+message GetPublicKeyResponse {
+  string pubkey = 1;
+}
+
+service Account {
+  rpc RegisterAccount (RegisterAccountRequest) returns (RegisterAccountResponse) {
+    option (google.api.http) = {
+      post: "/api/v1.0/accounts/register"
+      body: "*"
+    };
+  }
+
+  rpc GetPublicKey (GetPublicKeyRequest) returns (GetPublicKeyResponse) {
+    option (google.api.http) = {
+      get: "/api/v1.0/accounts/{address}"
+    };
+  }
+}

@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/obada-foundation/registry/services/diddoc"
-	"github.com/obada-foundation/registry/system/db"
 	"github.com/obada-foundation/registry/testutil"
+	"github.com/obada-foundation/registry/testutil/services"
 	"github.com/obada-foundation/registry/types"
 	"github.com/obada-foundation/sdkgo/asset"
 	sdkdid "github.com/obada-foundation/sdkgo/did"
@@ -24,20 +24,13 @@ type testCase struct {
 }
 
 func Test_Service(t *testing.T) {
-	c, err := testutil.StartDB()
-	defer testutil.StopDB(c)
 	logger, deferFn := testutil.NewTestLoger()
+	defer deferFn()
 
 	ctx := context.Background()
 
-	dbClient, err := db.NewDBConnection(ctx, db.Connection{
-		Host:   c.Host,
-		Port:   c.Port,
-		User:   "immudb",
-		Pass:   "immudb",
-		DBName: "defaultdb",
-	})
-	require.NoError(t, err)
+	dbClient, deferFn := services.MakeDBClient(ctx, t)
+	defer deferFn()
 
 	service := diddoc.NewService(dbClient, logger)
 
@@ -70,7 +63,7 @@ func Test_Service(t *testing.T) {
 			},
 			{
 				did: "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88",
-				err: diddoc.ErrDIDAlereadyRegistered,
+				err: diddoc.ErrDIDAlreadyRegistered,
 			},
 		}
 
@@ -146,7 +139,7 @@ func Test_Service(t *testing.T) {
 
 		t.Logf("\t Add second object to the metadata. Version: 2")
 		{
-			err = service.SaveMetadata(
+			err := service.SaveMetadata(
 				ctx,
 				DID,
 				[]asset.Object{
@@ -189,7 +182,7 @@ func Test_Service(t *testing.T) {
 
 		t.Logf("\t Remove a second object from the metadata. Version: 3")
 		{
-			err = service.SaveMetadata(
+			err := service.SaveMetadata(
 				ctx,
 				DID,
 				[]asset.Object{

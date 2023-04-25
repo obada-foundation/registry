@@ -43,8 +43,11 @@ coverage:
 	go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
 
 swagger:
-	swag fmt
-	swag init -g main.go
+	docker run \
+		-p 80:8080 \
+		-e SWAGGER_JSON=/openapi/api.swagger.json \
+		-v $$(pwd)/openapi/:/openapi \
+		swaggerapi/swagger-ui
 
 mockgen:
 	./scripts/mockgen.sh
