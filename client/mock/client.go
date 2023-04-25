@@ -5,11 +5,13 @@
 package mock
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	types "github.com/obada-foundation/registry/types"
-	asset "github.com/obada-foundation/sdkgo/asset"
+	account "github.com/obada-foundation/registry/api/pb/v1/account"
+	diddoc "github.com/obada-foundation/registry/api/pb/v1/diddoc"
+	grpc "google.golang.org/grpc"
 )
 
 // MockClient is a mock of Client interface.
@@ -35,60 +37,136 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// Get mocks base method.
-func (m *MockClient) Get(DID string) (types.DIDDocument, error) {
+// Close mocks base method.
+func (m *MockClient) Close() error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", DID)
-	ret0, _ := ret[0].(types.DIDDocument)
+	ret := m.ctrl.Call(m, "Close")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Close indicates an expected call of Close.
+func (mr *MockClientMockRecorder) Close() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockClient)(nil).Close))
+}
+
+// Get mocks base method.
+func (m *MockClient) Get(ctx context.Context, in *diddoc.GetRequest, opts ...grpc.CallOption) (*diddoc.GetResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Get", varargs...)
+	ret0, _ := ret[0].(*diddoc.GetResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockClientMockRecorder) Get(DID interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) Get(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockClient)(nil).Get), DID)
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockClient)(nil).Get), varargs...)
 }
 
 // GetMetadataHistory mocks base method.
-func (m *MockClient) GetMetadataHistory(DID string) (asset.DataArrayVersions, error) {
+func (m *MockClient) GetMetadataHistory(ctx context.Context, in *diddoc.GetMetadataHistoryRequest, opts ...grpc.CallOption) (*diddoc.GetMetadataHistoryResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMetadataHistory", DID)
-	ret0, _ := ret[0].(asset.DataArrayVersions)
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetMetadataHistory", varargs...)
+	ret0, _ := ret[0].(*diddoc.GetMetadataHistoryResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetMetadataHistory indicates an expected call of GetMetadataHistory.
-func (mr *MockClientMockRecorder) GetMetadataHistory(DID interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) GetMetadataHistory(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetadataHistory", reflect.TypeOf((*MockClient)(nil).GetMetadataHistory), DID)
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetadataHistory", reflect.TypeOf((*MockClient)(nil).GetMetadataHistory), varargs...)
+}
+
+// GetPublicKey mocks base method.
+func (m *MockClient) GetPublicKey(ctx context.Context, in *account.GetPublicKeyRequest, opts ...grpc.CallOption) (*account.GetPublicKeyResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetPublicKey", varargs...)
+	ret0, _ := ret[0].(*account.GetPublicKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPublicKey indicates an expected call of GetPublicKey.
+func (mr *MockClientMockRecorder) GetPublicKey(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPublicKey", reflect.TypeOf((*MockClient)(nil).GetPublicKey), varargs...)
 }
 
 // Register mocks base method.
-func (m *MockClient) Register(newDID types.RegisterDID) error {
+func (m *MockClient) Register(ctx context.Context, in *diddoc.RegisterRequest, opts ...grpc.CallOption) (*diddoc.RegisterResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Register", newDID)
-	ret0, _ := ret[0].(error)
-	return ret0
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Register", varargs...)
+	ret0, _ := ret[0].(*diddoc.RegisterResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Register indicates an expected call of Register.
-func (mr *MockClientMockRecorder) Register(newDID interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) Register(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockClient)(nil).Register), newDID)
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockClient)(nil).Register), varargs...)
+}
+
+// RegisterAccount mocks base method.
+func (m *MockClient) RegisterAccount(ctx context.Context, in *account.RegisterAccountRequest, opts ...grpc.CallOption) (*account.RegisterAccountResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RegisterAccount", varargs...)
+	ret0, _ := ret[0].(*account.RegisterAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RegisterAccount indicates an expected call of RegisterAccount.
+func (mr *MockClientMockRecorder) RegisterAccount(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterAccount", reflect.TypeOf((*MockClient)(nil).RegisterAccount), varargs...)
 }
 
 // SaveMetadata mocks base method.
-func (m *MockClient) SaveMetadata(DID string, md types.SaveMetadata) error {
+func (m *MockClient) SaveMetadata(ctx context.Context, in *diddoc.SaveMetadataRequest, opts ...grpc.CallOption) (*diddoc.SaveMetadataResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SaveMetadata", DID, md)
-	ret0, _ := ret[0].(error)
-	return ret0
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SaveMetadata", varargs...)
+	ret0, _ := ret[0].(*diddoc.SaveMetadataResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SaveMetadata indicates an expected call of SaveMetadata.
-func (mr *MockClientMockRecorder) SaveMetadata(DID, md interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) SaveMetadata(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveMetadata", reflect.TypeOf((*MockClient)(nil).SaveMetadata), DID, md)
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveMetadata", reflect.TypeOf((*MockClient)(nil).SaveMetadata), varargs...)
 }

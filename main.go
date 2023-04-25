@@ -12,18 +12,11 @@ import (
 	"go.uber.org/zap"
 )
 
-//	@title			OBADA DID Registry
-//	@version		v0.1
-//	@contact.name	techops@obada.io
-//	@contact.url	https://www.obada.io
-//	@host			registry.obada.io
-//	@BasePath		/0.1/
-//	@schemes		https http
-
 var revision = "unknown"
 
 type opts struct {
 	ServerCmd cmd.ServerCommand `command:"server"`
+	ClientCmd cmd.ClientCommand `command:"client"`
 }
 
 func main() {

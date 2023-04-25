@@ -1,138 +1,67 @@
 package client
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
+	"context"
 
-	"github.com/obada-foundation/registry/services/diddoc"
-	"github.com/obada-foundation/registry/types"
-	"github.com/obada-foundation/sdkgo/asset"
+	acc "github.com/obada-foundation/registry/api/pb/v1/account"
+	"github.com/obada-foundation/registry/api/pb/v1/diddoc"
+	"google.golang.org/grpc"
 )
 
-// Client is allows to query the registry
+// Client is allows communication with grpc server
 type Client interface {
-	// Register a DID with the registry
-	Register(newDID types.RegisterDID) error
+	acc.AccountClient
+	diddoc.DIDDocClient
 
-	// Get a DID document from the registry
-	Get(DID string) (types.DIDDocument, error)
-
-	// GetMetadataHistory returns the history of changes of asset data
-	GetMetadataHistory(DID string) (asset.DataArrayVersions, error)
-
-	// SaveMetadata saves the asset metadata to the regostry
-	SaveMetadata(DID string, md types.SaveMetadata) error
+	Close() error
 }
 
-// HTTPClient is a client for the registry API
-type HTTPClient struct {
-	h   *http.Client
-	url string
+type grpcClient struct {
+	cc      *grpc.ClientConn
+	account acc.AccountClient
+	diddoc  diddoc.DIDDocClient
 }
 
-// NewHTTPClient creates a new instance of HTTPClient
-func NewHTTPClient(registryURL string) *HTTPClient {
-	h := &http.Client{}
-
-	return &HTTPClient{
-		h:   h,
-		url: registryURL,
+// NewClient creates a new instance of Client
+func NewClient(conn *grpc.ClientConn) Client {
+	return grpcClient{
+		cc:      conn,
+		account: acc.NewAccountClient(conn),
+		diddoc:  diddoc.NewDIDDocClient(conn),
 	}
 }
 
-// Register implements Client.Register
-func (c *HTTPClient) Register(newDID types.RegisterDID) error {
-	b, err := json.Marshal(newDID)
-	if err != nil {
-		return err
-	}
-
-	resp, err := c.h.Post(c.url+"/api/v1.0/register", "application/json", bytes.NewBuffer(b))
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != http.StatusCreated {
-		b, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return fmt.Errorf("failed to register DID: %w", err)
-		}
-		_ = resp.Body.Close()
-
-		return fmt.Errorf("failed to register DID: %q", string(b))
-	}
-
-	return nil
+// GetPublicKey register a new public key
+func (c grpcClient) GetPublicKey(ctx context.Context, msg *acc.GetPublicKeyRequest, opts ...grpc.CallOption) (*acc.GetPublicKeyResponse, error) {
+	return c.account.GetPublicKey(ctx, msg, opts...)
 }
 
-// SaveMetadata implements Client.SaveMetadata
-func (c *HTTPClient) SaveMetadata(did string, md types.SaveMetadata) error {
-	b, err := json.Marshal(md)
-	if err != nil {
-		return err
-	}
-
-	resp, err := c.h.Post(c.url+"/api/v1.0/"+did+"/metadata", "application/json", bytes.NewBuffer(b))
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		b, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return fmt.Errorf("failed to save metadata: %w", err)
-		}
-		_ = resp.Body.Close()
-
-		return fmt.Errorf("failed to save metadata: %q", string(b))
-	}
-
-	return nil
+// RegisterAccount register a new public key
+func (c grpcClient) RegisterAccount(ctx context.Context, msg *acc.RegisterAccountRequest, opts ...grpc.CallOption) (*acc.RegisterAccountResponse, error) {
+	return c.account.RegisterAccount(ctx, msg, opts...)
 }
 
-// GetMetadataHistory implements Client.GetMetadataHistory
-func (c *HTTPClient) GetMetadataHistory(did string) (asset.DataArrayVersions, error) {
-	var history asset.DataArrayVersions
-
-	resp, err := c.h.Get(c.url + "/api/v1.0/" + did + "/metadata-history")
-	if err != nil {
-		return history, err
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
-		return history, diddoc.ErrDIDNotRegistered
-	}
-
-	dec := json.NewDecoder(resp.Body)
-	if err := dec.Decode(&history); err != nil {
-		return history, err
-	}
-	_ = resp.Body.Close()
-
-	return history, nil
+// Register register a new DID document
+func (c grpcClient) Register(ctx context.Context, msg *diddoc.RegisterRequest, opts ...grpc.CallOption) (*diddoc.RegisterResponse, error) {
+	return c.diddoc.Register(ctx, msg, opts...)
 }
 
-// Get implements Client.Get
-func (c *HTTPClient) Get(did string) (types.DIDDocument, error) {
-	var doc types.DIDDocument
+// Get fetches DID document from the registry
+func (c grpcClient) Get(ctx context.Context, msg *diddoc.GetRequest, opts ...grpc.CallOption) (*diddoc.GetResponse, error) {
+	return c.diddoc.Get(ctx, msg, opts...)
+}
 
-	resp, err := c.h.Get(c.url + "/api/v1.0/" + did)
-	if err != nil {
-		return doc, err
-	}
+// GetMetadataHistory returns metadata history
+func (c grpcClient) GetMetadataHistory(ctx context.Context, msg *diddoc.GetMetadataHistoryRequest, opts ...grpc.CallOption) (*diddoc.GetMetadataHistoryResponse, error) {
+	return c.diddoc.GetMetadataHistory(ctx, msg, opts...)
+}
 
-	if resp.StatusCode == http.StatusNotFound {
-		return doc, diddoc.ErrDIDNotRegistered
-	}
+// SaveMetadata saves DID document metadata
+func (c grpcClient) SaveMetadata(ctx context.Context, msg *diddoc.SaveMetadataRequest, opts ...grpc.CallOption) (*diddoc.SaveMetadataResponse, error) {
+	return c.diddoc.SaveMetadata(ctx, msg, opts...)
+}
 
-	dec := json.NewDecoder(resp.Body)
-	if err := dec.Decode(&doc); err != nil {
-		return doc, err
-	}
-	_ = resp.Body.Close()
-
-	return doc, nil
+// Close close all client connections
+func (c grpcClient) Close() error {
+	return c.cc.Close()
 }
