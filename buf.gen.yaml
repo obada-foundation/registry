@@ -1,0 +1,23 @@
+version: v1
+plugins:
+- plugin: go
+  out: api/pb
+  opt:
+    - paths=source_relative
+
+# generate gRPC stubs in golang
+- plugin: go-grpc
+  out: api/pb
+  opt:
+    - paths=source_relative
+
+# generate reverse proxy from protocol definations
+- plugin: buf.build/grpc-ecosystem/gateway
+  out: api/pb
+  opt:
+    - paths=source_relative
+
+# generate openapi documentation for api
+- plugin: buf.build/grpc-ecosystem/openapiv2
+  out: openapi
+  opt: allow_merge=true,merge_file_name=api

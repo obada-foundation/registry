@@ -15,10 +15,10 @@ import (
 // Account defines an interface API for registerening account addresses and their public keys
 type Account interface {
 	// RegisterAccount registers an account public key
-	Register(ctx types.Context, pubKey string) error
+	Register(ctx context.Context, pubKey string) error
 
 	// GetPublicKey returns the base58 public key for the given address
-	GetPublicKey(address string) (string, error)
+	GetPublicKey(ctx context.Context, address string) (string, error)
 }
 
 // Service is impementation of the Account interface

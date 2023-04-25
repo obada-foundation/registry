@@ -107,7 +107,7 @@ func (s Service) Register(ctx context.Context, did string, vm []types.Verificati
 	}
 
 	if _, err = s.Get(ctx, DID.String()); err == nil {
-		return ErrDIDAlereadyRegistered
+		return ErrDIDAlreadyRegistered
 	}
 
 	DIDDoc := types.NewDIDDoc()

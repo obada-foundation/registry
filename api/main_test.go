@@ -1,4 +1,4 @@
-package tests
+package api_test
 
 import (
 	"fmt"
@@ -9,8 +9,6 @@ import (
 
 // nolint
 var c *testutil.Container
-
-type JSON map[string]interface{}
 
 func TestMain(m *testing.M) {
 	var err error

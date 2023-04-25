@@ -1,41 +1,53 @@
 package api
 
 import (
-	"net/http"
 	"os"
 
-	middleware "github.com/obada-foundation/registry/api/middleware/v1"
-	"github.com/obada-foundation/registry/api/v1"
+	pbacc "github.com/obada-foundation/registry/api/pb/v1/account"
+	pbdidoc "github.com/obada-foundation/registry/api/pb/v1/diddoc"
+	"github.com/obada-foundation/registry/services/account"
 	"github.com/obada-foundation/registry/services/diddoc"
-	"github.com/obada-foundation/registry/system/web"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
-// MuxConfig defines the dependencies for the APIMux
-type MuxConfig struct {
+// GRPCServer implements server gRPC calls for the DID registry.
+type GRPCServer struct {
+	pbdidoc.UnimplementedDIDDocServer
+	pbacc.UnimplementedAccountServer
+
+	Log *zap.SugaredLogger
+
+	// Services
+	DIDDocService  diddoc.DIDDoc
+	AccountService account.Account
+}
+
+// GRPCConfig defines the dependencies for the gRPC server
+type GRPCConfig struct {
 	Shutdown chan os.Signal
 	Log      *zap.SugaredLogger
 
 	// Services
-	DIDDoc diddoc.DIDDoc
+	DIDDocService  diddoc.DIDDoc
+	AccountService account.Account
 }
 
-// Mux constructs a http.Handler with all application routes defined.
-func Mux(cfg MuxConfig) http.Handler {
-	app := web.NewApp(
-		cfg.Shutdown,
-		middleware.Logger(cfg.Log),
-		middleware.Errors(cfg.Log),
-		middleware.Metrics(),
-		middleware.Panics(),
-	)
-
-	v1.Routes(app, v1.Config{
+// NewGRPCServer creates a new grpc server
+func NewGRPCServer(cfg GRPCConfig) (*grpc.Server, *GRPCServer) {
+	srv := &GRPCServer{
 		Log: cfg.Log,
 
 		// Services
-		DIDDoc: cfg.DIDDoc,
-	})
+		DIDDocService:  cfg.DIDDocService,
+		AccountService: cfg.AccountService,
+	}
 
-	return app
+	grpcServer := grpc.NewServer()
+	pbdidoc.RegisterDIDDocServer(grpcServer, srv)
+	pbacc.RegisterAccountServer(grpcServer, srv)
+	reflection.Register(grpcServer)
+
+	return grpcServer, srv
 }

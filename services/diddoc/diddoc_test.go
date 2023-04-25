@@ -63,7 +63,7 @@ func Test_Service(t *testing.T) {
 			},
 			{
 				did: "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88",
-				err: diddoc.ErrDIDAlereadyRegistered,
+				err: diddoc.ErrDIDAlreadyRegistered,
 			},
 		}
 

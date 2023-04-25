@@ -1,0 +1,6 @@
+version: v1
+name: buf.build/obada-foundation/registry
+deps:
+  # adding well known types by google
+  - buf.build/googleapis/googleapis
+  - buf.build/grpc-ecosystem/grpc-gateway

@@ -1,0 +1,61 @@
+syntax = "proto3";
+package v1.diddoc;
+
+option go_package = "github.com/obada-foundation/registry/services/v1/diddoc";
+
+import "google/api/annotations.proto";
+
+message DIDDocument {
+  repeated string context = 1;
+  string id = 2;
+  repeated string controller = 3;
+  repeated VerificationMethod verification_method = 4;
+  repeated string authentication = 5;
+  repeated string assertion_method = 6;
+  repeated string capability_invocation = 7;
+  repeated string capability_delegation = 8;
+  repeated string key_agreement = 9;
+  repeated Service service = 10;
+  repeated string also_known_as = 11;
+  Metadata metadata = 12;
+}
+
+message VerificationMethod {
+  repeated string context = 1;
+  string id = 2;
+  string type = 3;
+  string controller = 4;
+  map<string, string> public_key_jwk = 5;
+  string public_key_multibase = 6;
+  string public_key_base58 = 7;
+}
+
+message Service {
+  string context = 1;
+  string id = 2;
+  string type = 3;
+  repeated string service_endpoint = 4;
+}
+
+message Metadata {
+  int32 version_id = 1;
+  string version_hash = 2;
+  string root_hash = 3;
+  repeated Object objects = 5;
+}
+
+message Object {
+  string url = 1;
+  string hash_encrypted_data_object = 2;
+  string hash_unencrypted_object = 3;          
+  map<string, string> metadata = 4;
+  string hash_unencrypted_metadata = 5;  
+  string hash_encrypted_metadata = 6;    
+  string data_object_hash = 7;     
+}
+
+message DataArray {
+  string version_hash = 1;  
+  string root_hash = 2;   
+  repeated Object objects = 3; 
+}
