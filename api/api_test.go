@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"github.com/obada-foundation/registry/api"
+	pbacc "github.com/obada-foundation/registry/api/pb/v1/account"
 	pbdiddoc "github.com/obada-foundation/registry/api/pb/v1/diddoc"
+	"github.com/obada-foundation/registry/services/account"
 	"github.com/obada-foundation/registry/services/diddoc"
 	"github.com/obada-foundation/registry/system/db"
 	"github.com/obada-foundation/registry/testutil"
@@ -21,8 +23,9 @@ import (
 )
 
 type apiTests struct {
-	conn   *grpc.ClientConn
-	diddoc pbdiddoc.DIDDocClient
+	conn    *grpc.ClientConn
+	diddoc  pbdiddoc.DIDDocClient
+	account pbacc.AccountClient
 }
 
 func startGRPCServer(t *testing.T) (*grpc.Server, *bufconn.Listener, func()) {
@@ -50,7 +53,8 @@ func startGRPCServer(t *testing.T) (*grpc.Server, *bufconn.Listener, func()) {
 		Log: logger,
 
 		// Services
-		DIDDocService: diddoc.NewService(dbClient, logger),
+		DIDDocService:  diddoc.NewService(dbClient, logger),
+		AccountService: account.NewService(dbClient, logger),
 	})
 	go func() {
 		if err := srv.Serve(listener); err != nil {
@@ -92,11 +96,10 @@ func Test_GRPCServer(t *testing.T) {
 	require.NoError(t, err)
 
 	tests := apiTests{
-		conn:   conn,
-		diddoc: pbdiddoc.NewDIDDocClient(conn),
+		conn:    conn,
+		diddoc:  pbdiddoc.NewDIDDocClient(conn),
+		account: pbacc.NewAccountClient(conn),
 	}
-
-	pbdiddoc.NewDIDDocClient(conn)
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -105,10 +108,14 @@ func Test_GRPCServer(t *testing.T) {
 		conn.Close()
 	}()
 
+	// DID Docs test
 	t.Run("registerNotSuportedDIDs", tests.registerNotSuportedDIDs)
 	t.Run("notRegisteredDIDs", tests.notRegisteredDIDs)
 	t.Run("registerDID", tests.registerDID)
 	t.Run("saveMetadata", tests.saveMetadata)
+
+	// Accounts test
+	t.Run("registerAccount", tests.registerAccount)
 }
 
 func permissionDenied(t *testing.T, err error) {

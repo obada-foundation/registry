@@ -18,10 +18,9 @@ import (
 )
 
 func (tests apiTests) saveMetadata(t *testing.T) {
-	t.Log("Save metadata")
+	t.Log("Save metadata tests...")
 
 	ctx := context.Background()
-
 	DID := "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb82"
 
 	t.Log("\tRegister DID for testing metadata save")
@@ -141,7 +140,6 @@ func (tests apiTests) registerDID(t *testing.T) {
 		})
 
 		er, ok := status.FromError(err)
-
 		assert.True(t, ok, "error is not a grpc error")
 		assert.Equal(t, diddoc.ErrDIDAlreadyRegistered.Error(), er.Message())
 		assert.Equal(t, codes.AlreadyExists, er.Code())
