@@ -95,6 +95,10 @@ func (s GRPCServer) Register(ctx context.Context, msg *pb.RegisterRequest) (*pb.
 	}
 
 	if err := s.DIDDocService.Register(ctx, msg.GetDid(), verificationMethods, msg.GetAuthentication()); err != nil {
+		if errors.Is(err, diddoc.ErrDIDAlreadyRegistered) {
+			return nil, status.Errorf(codes.AlreadyExists, err.Error())
+		}
+
 		if err != sdkdid.ErrNotSupportedDIDMethod {
 			return resp, fmt.Errorf("cannot create DID from string: %w", err)
 		}
@@ -133,7 +137,7 @@ func (s GRPCServer) SaveMetadata(ctx context.Context, msg *pb.SaveMetadataReques
 				}
 
 				if pubKey.VerifySignature(msgBytes, msg.GetSignature()) {
-					objects := make([]asset.Object, len(data.GetObjects()))
+					objects := make([]asset.Object, 0, len(data.GetObjects()))
 
 					for _, obj := range data.GetObjects() {
 						objects = append(objects, asset.Object{
@@ -147,10 +151,6 @@ func (s GRPCServer) SaveMetadata(ctx context.Context, msg *pb.SaveMetadataReques
 					}
 
 					if err := s.DIDDocService.SaveMetadata(ctx, data.GetDid(), objects); err != nil {
-						if err != sdkdid.ErrNotSupportedDIDMethod {
-							return resp, fmt.Errorf("cannot create DID from string: %w", err)
-						}
-
 						return resp, err
 					}
 
