@@ -117,6 +117,14 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 
 		require.NoError(t, er)
 	}
+
+	t.Log("\tGet metadata history")
+	{
+		_, err := tests.diddoc.GetMetadataHistory(context.Background(), &pbdiddoc.GetMetadataHistoryRequest{
+			Did: "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb89",
+		})
+		require.NoError(t, err)
+	}
 }
 
 func (tests apiTests) registerDID(t *testing.T) {
