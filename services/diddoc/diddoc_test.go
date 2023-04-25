@@ -33,7 +33,6 @@ func Test_Service(t *testing.T) {
 	defer deferFn()
 
 	service := diddoc.NewService(dbClient, logger)
-
 	t.Logf("Test \"Register\" function")
 	{
 
@@ -208,9 +207,12 @@ func Test_Service(t *testing.T) {
 			require.NoError(t, err)
 			t.Logf("\t DIDDoc: \n%s", string(j))
 		}
-	}
 
-	defer func() {
-		deferFn()
-	}()
+		t.Logf("\t Remove a second object from the metadata. Version: 3")
+		{
+			_, err := service.GetMetadataHistory(ctx, DID)
+			require.NoError(t, err)
+		}
+
+	}
 }
