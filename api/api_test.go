@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/obada-foundation/registry/api"
 	pbacc "github.com/obada-foundation/registry/api/pb/v1/account"
 	pbdiddoc "github.com/obada-foundation/registry/api/pb/v1/diddoc"
@@ -46,7 +47,7 @@ func startGRPCServer(t *testing.T) (*grpc.Server, *bufconn.Listener, func()) {
 	dbClient, err := db.NewDBConnection(ctx, conn)
 	require.NoErrorf(t, err, "No connection with docker container %+v %+v", c, conn)
 
-	err = dbClient.HealthCheck(ctx)
+	_, err = dbClient.ServerInfo(ctx, &schema.ServerInfoRequest{})
 	require.NoError(t, err, "immudb is not healthy")
 
 	srv, _ := api.NewGRPCServer(api.GRPCConfig{
