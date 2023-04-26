@@ -15,6 +15,7 @@ COPY --from=build /src/registry /usr/sbin/registry
 COPY --from=build "/etc/ssl/certs/ca-certificates.crt" "/etc/ssl/certs/ca-certificates.crt"
 
 EXPOSE 2017
+EXPOSE 2018
 
 USER "${REGISTRY_UID}:${REGISTRY_GID}"
 ENTRYPOINT ["/usr/sbin/registry", "server"]
