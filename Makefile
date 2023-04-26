@@ -6,7 +6,8 @@ BUILD_TAGS=-tags
 
 # Various build flags
 V_LDFLAGS_SYMBOL := -s
-V_LDFLAGS_COMMON := ${V_LDFLAGS_SYMBOL}
+V_LDFLAGS_BUILD := -X "google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=warn"
+V_LDFLAGS_COMMON := ${V_LDFLAGS_SYMBOL} ${V_LDFLAGS_BUILD}
 V_LDFLAGS_STATIC := ${V_LDFLAGS_COMMON}
 
 GO ?= go
