@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	flags "github.com/jessevdk/go-flags"
 	"github.com/obada-foundation/registry/cmd"
 	log "github.com/obada-foundation/registry/system/logger"
@@ -17,6 +18,13 @@ var revision = "unknown"
 type opts struct {
 	ServerCmd cmd.ServerCommand `command:"server"`
 	ClientCmd cmd.ClientCommand `command:"client"`
+}
+
+//nolint:gochecknoinits // this is an entrypoint
+func init() {
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount("obada", "obada"+sdk.PrefixPublic)
+	config.Seal()
 }
 
 func main() {

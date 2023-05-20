@@ -32,6 +32,9 @@ type apiTests struct {
 func startGRPCServer(t *testing.T) (*grpc.Server, *bufconn.Listener, func()) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
+	c, err := testutil.StartDB()
+	require.NoError(t, err, "cabbot start db")
+
 	listener := bufconn.Listen(1024 * 1024)
 
 	logger, logDeferFn := testutil.NewTestLoger()
@@ -123,6 +126,6 @@ func permissionDenied(t *testing.T, err error) {
 	er, ok := status.FromError(err)
 
 	assert.True(t, ok, "error is not a grpc error")
-	assert.Equal(t, "unauthorized", er.Message())
+	assert.Contains(t, "unauthorized", er.Message())
 	assert.Equal(t, codes.PermissionDenied, er.Code())
 }

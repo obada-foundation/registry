@@ -6,8 +6,8 @@ require (
 	github.com/codenotary/immudb v1.4.1
 	github.com/cosmos/cosmos-sdk v0.46.8
 	github.com/getsentry/sentry-go v0.19.0
-	github.com/gogo/protobuf v1.3.2
 	github.com/golang/mock v1.6.0
+	github.com/golang/protobuf v1.5.3
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/obada-foundation/common v0.0.0-20230405225442-b8cc8dc633b0
@@ -50,8 +50,8 @@ require (
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/glog v1.0.0 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect

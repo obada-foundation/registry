@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	"github.com/gogo/protobuf/proto"
+	"github.com/obada-foundation/registry/api"
 	pbdiddoc "github.com/obada-foundation/registry/api/pb/v1/diddoc"
 	"github.com/obada-foundation/registry/services/diddoc"
 	"github.com/obada-foundation/sdkgo/asset"
@@ -87,7 +87,7 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 			PublicKeyBase58: base58PubKey,
 		})
 
-		_, err := tests.diddoc.Register(context.Background(), regMsg)
+		_, err := tests.diddoc.Register(ctx, regMsg)
 		require.NoError(t, err)
 
 		data := &pbdiddoc.SaveMetadataRequest_Data{
@@ -104,10 +104,10 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 			HashUnencryptedObject: "QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
 		})
 
-		dataBytes, err := proto.Marshal(data)
+		hash, err := api.MetadataDeterministicChecksum(data)
 		require.NoError(t, err)
 
-		signature, err := privKey.Sign(dataBytes)
+		signature, err := privKey.Sign(hash[:])
 		require.NoError(t, err)
 
 		_, er := tests.diddoc.SaveMetadata(ctx, &pbdiddoc.SaveMetadataRequest{
@@ -120,7 +120,7 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 
 	t.Log("\tGet metadata history")
 	{
-		_, err := tests.diddoc.GetMetadataHistory(context.Background(), &pbdiddoc.GetMetadataHistoryRequest{
+		_, err := tests.diddoc.GetMetadataHistory(ctx, &pbdiddoc.GetMetadataHistoryRequest{
 			Did: "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb89",
 		})
 		require.NoError(t, err)
