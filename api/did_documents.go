@@ -14,7 +14,6 @@ import (
 	sdkdid "github.com/obada-foundation/sdkgo/did"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 )
 
 // Get DID document from the registry
@@ -124,6 +123,11 @@ func (s GRPCServer) SaveMetadata(ctx context.Context, msg *pb.SaveMetadataReques
 		return resp, err
 	}
 
+	hash, err := MetadataDeterministicChecksum(data)
+	if err != nil {
+		return resp, err
+	}
+
 	for _, authKey := range DIDDoc.Authentication {
 		for _, method := range DIDDoc.VerificationMethod {
 			if method.ID == authKey && method.PublicKeyBase58 != "" {
@@ -131,12 +135,7 @@ func (s GRPCServer) SaveMetadata(ctx context.Context, msg *pb.SaveMetadataReques
 					Key: base58.Decode(method.PublicKeyBase58),
 				}
 
-				msgBytes, err := proto.Marshal(data)
-				if err != nil {
-					return resp, err
-				}
-
-				if pubKey.VerifySignature(msgBytes, msg.GetSignature()) {
+				if pubKey.VerifySignature(hash[:], msg.GetSignature()) {
 					objects := make([]asset.Object, 0, len(data.GetObjects()))
 
 					for _, obj := range data.GetObjects() {
