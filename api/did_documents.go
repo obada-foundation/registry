@@ -108,58 +108,75 @@ func (s GRPCServer) Register(ctx context.Context, msg *pb.RegisterRequest) (*pb.
 	return resp, nil
 }
 
-// SaveMetadata updates metadata for DID
-func (s GRPCServer) SaveMetadata(ctx context.Context, msg *pb.SaveMetadataRequest) (*pb.SaveMetadataResponse, error) {
-	resp := &pb.SaveMetadataResponse{}
-
-	if len(msg.GetSignature()) == 0 {
-		return nil, status.Errorf(codes.PermissionDenied, "unauthorized")
+func (s GRPCServer) checkSignature(ctx context.Context, did, authKey string, hash [32]byte, sig []byte) (bool, error) {
+	if len(sig) == 0 {
+		return false, nil
 	}
 
-	data := msg.GetData()
-
-	DIDDoc, err := s.checkIfRegistered(ctx, data.GetDid())
+	DIDDoc, err := s.checkIfRegistered(ctx, did)
 	if err != nil {
-		return resp, err
+		return false, err
 	}
 
-	hash, err := MetadataDeterministicChecksum(data)
-	if err != nil {
-		return resp, err
-	}
-
-	for _, authKey := range DIDDoc.Authentication {
-		for _, method := range DIDDoc.VerificationMethod {
-			if method.ID == authKey && method.PublicKeyBase58 != "" {
-				pubKey := secp256k1.PubKey{
-					Key: base58.Decode(method.PublicKeyBase58),
-				}
-
-				if pubKey.VerifySignature(hash[:], msg.GetSignature()) {
-					objects := make([]asset.Object, 0, len(data.GetObjects()))
-
-					for _, obj := range data.GetObjects() {
-						objects = append(objects, asset.Object{
-							URL:                     obj.GetUrl(),
-							HashEncryptedDataObject: obj.GetHashEncryptedDataObject(),
-							HashUnencryptedObject:   obj.GetHashUnencryptedObject(),
-							Metadata:                obj.GetMetadata(),
-							HashUnencryptedMetadata: obj.GetHashUnencryptedMetadata(),
-							HashEncryptedMetadata:   obj.GetHashEncryptedMetadata(),
-						})
+	for _, ak := range DIDDoc.Authentication {
+		if ak == authKey {
+			for _, method := range DIDDoc.VerificationMethod {
+				if method.ID == authKey {
+					pubKey := secp256k1.PubKey{
+						Key: base58.Decode(method.PublicKeyBase58),
 					}
 
-					if err := s.DIDDocService.SaveMetadata(ctx, data.GetDid(), objects); err != nil {
-						return resp, err
+					if pubKey.VerifySignature(hash[:], sig) {
+						return true, nil
 					}
 
-					return resp, nil
+					return false, nil
 				}
 			}
 		}
 	}
 
-	return nil, status.Errorf(codes.PermissionDenied, "unauthorized")
+	return false, nil
+}
+
+// SaveMetadata updates metadata for DID
+func (s GRPCServer) SaveMetadata(ctx context.Context, msg *pb.SaveMetadataRequest) (*pb.SaveMetadataResponse, error) {
+	resp := &pb.SaveMetadataResponse{}
+
+	data := msg.GetData()
+
+	hash, err := ProtoDeterministicChecksum(data)
+	if err != nil {
+		return resp, err
+	}
+
+	ok, err := s.checkSignature(ctx, data.GetDid(), data.GetAuthenticationKeyId(), hash, msg.GetSignature())
+	if err != nil {
+		return resp, err
+	}
+
+	if !ok {
+		return nil, status.Errorf(codes.PermissionDenied, "unauthorized")
+	}
+
+	objects := make([]asset.Object, 0, len(data.GetObjects()))
+
+	for _, obj := range data.GetObjects() {
+		objects = append(objects, asset.Object{
+			URL:                     obj.GetUrl(),
+			HashEncryptedDataObject: obj.GetHashEncryptedDataObject(),
+			HashUnencryptedObject:   obj.GetHashUnencryptedObject(),
+			Metadata:                obj.GetMetadata(),
+			HashUnencryptedMetadata: obj.GetHashUnencryptedMetadata(),
+			HashEncryptedMetadata:   obj.GetHashEncryptedMetadata(),
+		})
+	}
+
+	if err := s.DIDDocService.SaveMetadata(ctx, data.GetDid(), objects); err != nil {
+		return resp, err
+	}
+
+	return resp, nil
 }
 
 // GetMetadataHistory returns historical records of metadata changes
@@ -213,4 +230,40 @@ func (s GRPCServer) checkIfRegistered(ctx context.Context, did string) (*types.D
 	}
 
 	return &didDoc, nil
+}
+
+// SaveVerificationMethods saves verification methods for DID
+func (s GRPCServer) SaveVerificationMethods(ctx context.Context, msg *pb.MsgSaveVerificationMethods) (*pb.SaveVerificationMethodsResponse, error) {
+	resp := &pb.SaveVerificationMethodsResponse{}
+
+	data := msg.GetData()
+	hash, err := ProtoDeterministicChecksum(data)
+	if err != nil {
+		return resp, err
+	}
+
+	ok, err := s.checkSignature(ctx, data.GetDid(), data.GetAuthenticationKeyId(), hash, msg.GetSignature())
+	if err != nil {
+		return resp, err
+	}
+
+	if !ok {
+		return nil, status.Errorf(codes.PermissionDenied, "unauthorized")
+	}
+
+	vms := make([]types.VerificationMethod, 0, len(data.GetVerificationMethods()))
+
+	for _, vm := range data.GetVerificationMethods() {
+		vms = append(vms, types.VerificationMethod{
+			Context: vm.GetContext(),
+			ID:      vm.GetId(),
+			Type:    vm.GetType(),
+		})
+	}
+
+	if err := s.DIDDocService.SaveVerificationMethods(ctx, data.GetDid(), vms, data.GetAuthentication()); err != nil {
+		return resp, err
+	}
+
+	return resp, nil
 }

@@ -61,6 +61,11 @@ func (c grpcClient) SaveMetadata(ctx context.Context, msg *diddoc.SaveMetadataRe
 	return c.diddoc.SaveMetadata(ctx, msg, opts...)
 }
 
+// SaveVerificationMethods saves verification methods
+func (c grpcClient) SaveVerificationMethods(ctx context.Context, msg *diddoc.MsgSaveVerificationMethods, opts ...grpc.CallOption) (*diddoc.SaveVerificationMethodsResponse, error) {
+	return c.diddoc.SaveVerificationMethods(ctx, msg, opts...)
+}
+
 // Close close all client connections
 func (c grpcClient) Close() error {
 	return c.cc.Close()

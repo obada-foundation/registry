@@ -38,12 +38,28 @@ message SaveMetadataRequest {
     field_configuration: {path_param_name: "did"},
   }];
     repeated Object objects = 2;
+    string authentication_key_id = 3;
   }
   bytes signature = 1;
   Data data = 2;
 }
 
 message SaveMetadataResponse {}
+
+message MsgSaveVerificationMethods {
+  message Data {
+    string did = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    field_configuration: {path_param_name: "did"},
+  }];
+    repeated VerificationMethod verification_methods = 2;
+    repeated string authentication = 3;
+    string authentication_key_id = 4;
+  }
+  bytes signature = 1;
+  Data data = 2;
+}
+
+message SaveVerificationMethodsResponse {}
 
 service DIDDoc {
   rpc Register (RegisterRequest) returns (RegisterResponse) {
@@ -68,6 +84,13 @@ service DIDDoc {
   rpc SaveMetadata (SaveMetadataRequest) returns (SaveMetadataResponse) {
     option (google.api.http) = {
       post: "/api/v1.0/diddoc/{data.did}/metadata"
+      body: "*"
+    };
+  }
+
+  rpc SaveVerificationMethods(MsgSaveVerificationMethods) returns (SaveVerificationMethodsResponse) {
+    option (google.api.http) = {
+      post: "/api/v1.0/diddoc/{data.did}/verification-methods"
       body: "*"
     };
   }

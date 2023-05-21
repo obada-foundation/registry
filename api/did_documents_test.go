@@ -91,8 +91,9 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 		require.NoError(t, err)
 
 		data := &pbdiddoc.SaveMetadataRequest_Data{
-			Did:     newDID,
-			Objects: make([]*pbdiddoc.Object, 0),
+			Did:                 newDID,
+			Objects:             make([]*pbdiddoc.Object, 0),
+			AuthenticationKeyId: regMsg.Authentication[0],
 		}
 
 		data.Objects = append(data.Objects, &pbdiddoc.Object{
@@ -104,7 +105,7 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 			HashUnencryptedObject: "QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
 		})
 
-		hash, err := api.MetadataDeterministicChecksum(data)
+		hash, err := api.ProtoDeterministicChecksum(data)
 		require.NoError(t, err)
 
 		signature, err := privKey.Sign(hash[:])

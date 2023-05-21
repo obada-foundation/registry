@@ -27,6 +27,9 @@ type DIDDoc interface {
 
 	// SaveMetadata saves metadata to the registry
 	SaveMetadata(ctx context.Context, did string, m []asset.Object) error
+
+	// SaveVerificationMethods saves verification methods for patrticular DID
+	SaveVerificationMethods(ctx context.Context, did string, vms []types.VerificationMethod, a []string) error
 }
 
 // Service implements DIDDoc
@@ -95,6 +98,36 @@ func (s Service) SaveMetadata(ctx context.Context, did string, m []asset.Object)
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+// SaveVerificationMethods implements DIDDoc SaveVerificationMethods
+func (s Service) SaveVerificationMethods(ctx context.Context, did string, vms []types.VerificationMethod, a []string) error {
+	DID, err := sdkdid.FromString(did, nil)
+	if err != nil {
+		return err
+	}
+
+	DIDDoc, err := s.Get(ctx, DID.String())
+	if err != nil {
+		return ErrDIDNotRegistered
+	}
+
+	DIDDoc.VerificationMethod = vms
+	DIDDoc.Authentication = a
+
+	gobData, err := encoder.DataEncode(DIDDoc)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.Set(ctx, []byte(DID.String()), gobData)
+	if err != nil {
+		return err
+	}
+
+	s.logger.Debugf("verification methods are updated for DID: %q", DID)
 
 	return nil
 }
