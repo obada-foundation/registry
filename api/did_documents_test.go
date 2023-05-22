@@ -71,7 +71,7 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 			Signature: []byte("some fake signature"),
 			Data: &pbdiddoc.SaveMetadataRequest_Data{
 				Did:                 DID,
-				AuthenticationKeyId: "",
+				AuthenticationKeyId: fmt.Sprintf("%s#keys-1", DID),
 				Objects: append(make([]*pbdiddoc.Object, 1), &pbdiddoc.Object{
 					Url: "https://ipfs.io/ipfs/QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
 					Metadata: map[string]string{

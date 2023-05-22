@@ -122,7 +122,7 @@ func (s GRPCServer) checkSignature(pubKey cryptotypes.PubKey, sig []byte, msg pr
 		return nil
 	}
 
-	return status.Errorf(codes.PermissionDenied, "unauthorized")
+	return status.Errorf(codes.Unauthenticated, "unauthorized")
 }
 
 // SaveMetadata updates metadata for DID
@@ -130,6 +130,14 @@ func (s GRPCServer) SaveMetadata(ctx context.Context, msg *pb.SaveMetadataReques
 	resp := &pb.SaveMetadataResponse{}
 
 	data := msg.GetData()
+
+	if len(msg.GetSignature()) == 0 {
+		return resp, status.Errorf(codes.InvalidArgument, "empty signature")
+	}
+
+	if data.GetAuthenticationKeyId() == "" {
+		return resp, status.Errorf(codes.InvalidArgument, "empty autherntication id")
+	}
 
 	pubKey, err := s.DIDDocService.GetVerificationKeyByAuthID(ctx, data.GetDid(), data.GetAuthenticationKeyId())
 	if err != nil {
@@ -222,6 +230,14 @@ func (s GRPCServer) SaveVerificationMethods(ctx context.Context, msg *pb.MsgSave
 	resp := &pb.SaveVerificationMethodsResponse{}
 
 	data := msg.GetData()
+
+	if len(msg.GetSignature()) == 0 {
+		return resp, status.Errorf(codes.InvalidArgument, "empty signature")
+	}
+
+	if data.GetAuthenticationKeyId() == "" {
+		return resp, status.Errorf(codes.InvalidArgument, "empty autherntication id")
+	}
 
 	pubKey, err := s.DIDDocService.GetVerificationKeyByAuthID(ctx, data.GetDid(), data.GetAuthenticationKeyId())
 	if err != nil {
