@@ -62,7 +62,7 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 			},
 		})
 
-		emptyAuthentificationId(t, err)
+		emptyAuthentificationID(t, err)
 	}
 
 	t.Log("\tSaving metadata without verification method")

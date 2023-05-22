@@ -108,7 +108,7 @@ func (s GRPCServer) Register(ctx context.Context, msg *pb.RegisterRequest) (*pb.
 	return resp, nil
 }
 
-func (s GRPCServer) checkSignature(ctx context.Context, pubKey cryptotypes.PubKey, sig []byte, msg proto.Message) error {
+func (s GRPCServer) checkSignature(pubKey cryptotypes.PubKey, sig []byte, msg proto.Message) error {
 	if len(sig) == 0 {
 		return status.Errorf(codes.InvalidArgument, "empty signature")
 	}
@@ -140,7 +140,7 @@ func (s GRPCServer) SaveMetadata(ctx context.Context, msg *pb.SaveMetadataReques
 		return resp, err
 	}
 
-	if err := s.checkSignature(ctx, pubKey, msg.GetSignature(), data); err != nil {
+	if err := s.checkSignature(pubKey, msg.GetSignature(), data); err != nil {
 		return resp, err
 	}
 
@@ -232,7 +232,7 @@ func (s GRPCServer) SaveVerificationMethods(ctx context.Context, msg *pb.MsgSave
 		return resp, err
 	}
 
-	if err := s.checkSignature(ctx, pubKey, msg.GetSignature(), data); err != nil {
+	if err := s.checkSignature(pubKey, msg.GetSignature(), data); err != nil {
 		return resp, err
 	}
 

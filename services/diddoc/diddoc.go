@@ -35,7 +35,7 @@ type DIDDoc interface {
 	SaveVerificationMethods(ctx context.Context, did string, vms []types.VerificationMethod, a []string) error
 
 	// GetVerificationKeyByAuthID returns verification key by authentification ID
-	GetVerificationKeyByAuthID(ctx context.Context, did, authId string) (cryptotypes.PubKey, error)
+	GetVerificationKeyByAuthID(ctx context.Context, did, authID string) (cryptotypes.PubKey, error)
 }
 
 // Service implements DIDDoc
@@ -170,16 +170,16 @@ func (s Service) Register(ctx context.Context, did string, vm []types.Verificati
 }
 
 // GetVerificationKeyByAuthID implements DIDDoc GetVerificationKeyByAuthID
-func (s Service) GetVerificationKeyByAuthID(ctx context.Context, did, authId string) (cryptotypes.PubKey, error) {
+func (s Service) GetVerificationKeyByAuthID(ctx context.Context, did, authID string) (cryptotypes.PubKey, error) {
 	DIDDoc, err := s.Get(ctx, did)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, ak := range DIDDoc.Authentication {
-		if ak == authId {
+		if ak == authID {
 			for _, method := range DIDDoc.VerificationMethod {
-				if method.ID == authId {
+				if method.ID == authID {
 					pubKey := secp256k1.PubKey{
 						Key: base58.Decode(method.PublicKeyBase58),
 					}

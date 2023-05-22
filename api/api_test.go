@@ -138,7 +138,7 @@ func emptySignature(t *testing.T, err error) {
 	assert.Equal(t, codes.InvalidArgument, er.Code())
 }
 
-func emptyAuthentificationId(t *testing.T, err error) {
+func emptyAuthentificationID(t *testing.T, err error) {
 	er, ok := status.FromError(err)
 
 	assert.True(t, ok, "error is not a grpc error")
