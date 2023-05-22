@@ -17,6 +17,38 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+func (tests apiTests) SaveVerificationMethods(t *testing.T) {
+	ctx := context.Background()
+	DID := "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb83"
+
+	t.Log("\tRegister DID for testing metadata save")
+	tests.registerDIDWithNoErrs(t, DID)
+
+	t.Log("\tSaving verification methods")
+	{
+		_, err := tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: []byte(""),
+			Data: &pbdiddoc.MsgSaveVerificationMethods_Data{
+				Did: DID,
+			},
+		})
+
+		emptySignature(t, err)
+	}
+
+	t.Log("\tSaving verification methods without authentification key ID")
+	{
+		_, err := tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: []byte("some fake signature"),
+			Data: &pbdiddoc.MsgSaveVerificationMethods_Data{
+				Did: DID,
+			},
+		})
+
+		emptyAuthentificationID(t, err)
+	}
+}
+
 func (tests apiTests) saveMetadata(t *testing.T) {
 	t.Log("Save metadata tests...")
 
