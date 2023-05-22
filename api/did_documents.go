@@ -5,15 +5,15 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	pb "github.com/obada-foundation/registry/api/pb/v1/diddoc"
 	"github.com/obada-foundation/registry/services/diddoc"
 	"github.com/obada-foundation/registry/types"
 	"github.com/obada-foundation/sdkgo/asset"
-	"github.com/obada-foundation/sdkgo/base58"
 	sdkdid "github.com/obada-foundation/sdkgo/did"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 )
 
 // Get DID document from the registry
@@ -108,35 +108,21 @@ func (s GRPCServer) Register(ctx context.Context, msg *pb.RegisterRequest) (*pb.
 	return resp, nil
 }
 
-func (s GRPCServer) checkSignature(ctx context.Context, did, authKey string, hash [32]byte, sig []byte) (bool, error) {
+func (s GRPCServer) checkSignature(ctx context.Context, pubKey cryptotypes.PubKey, sig []byte, msg proto.Message) error {
 	if len(sig) == 0 {
-		return false, nil
+		return status.Errorf(codes.InvalidArgument, "empty signature")
 	}
 
-	DIDDoc, err := s.checkIfRegistered(ctx, did)
+	hash, err := ProtoDeterministicChecksum(msg)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	for _, ak := range DIDDoc.Authentication {
-		if ak == authKey {
-			for _, method := range DIDDoc.VerificationMethod {
-				if method.ID == authKey {
-					pubKey := secp256k1.PubKey{
-						Key: base58.Decode(method.PublicKeyBase58),
-					}
-
-					if pubKey.VerifySignature(hash[:], sig) {
-						return true, nil
-					}
-
-					return false, nil
-				}
-			}
-		}
+	if pubKey.VerifySignature(hash[:], sig) {
+		return nil
 	}
 
-	return false, nil
+	return status.Errorf(codes.PermissionDenied, "unauthorized")
 }
 
 // SaveMetadata updates metadata for DID
@@ -145,18 +131,17 @@ func (s GRPCServer) SaveMetadata(ctx context.Context, msg *pb.SaveMetadataReques
 
 	data := msg.GetData()
 
-	hash, err := ProtoDeterministicChecksum(data)
+	pubKey, err := s.DIDDocService.GetVerificationKeyByAuthID(ctx, data.GetDid(), data.GetAuthenticationKeyId())
 	if err != nil {
+		if errors.Is(err, diddoc.ErrDIDNotRegistered) {
+			return nil, status.Errorf(codes.NotFound, err.Error())
+		}
+
 		return resp, err
 	}
 
-	ok, err := s.checkSignature(ctx, data.GetDid(), data.GetAuthenticationKeyId(), hash, msg.GetSignature())
-	if err != nil {
+	if err := s.checkSignature(ctx, pubKey, msg.GetSignature(), data); err != nil {
 		return resp, err
-	}
-
-	if !ok {
-		return nil, status.Errorf(codes.PermissionDenied, "unauthorized")
 	}
 
 	objects := make([]asset.Object, 0, len(data.GetObjects()))
@@ -237,18 +222,18 @@ func (s GRPCServer) SaveVerificationMethods(ctx context.Context, msg *pb.MsgSave
 	resp := &pb.SaveVerificationMethodsResponse{}
 
 	data := msg.GetData()
-	hash, err := ProtoDeterministicChecksum(data)
+
+	pubKey, err := s.DIDDocService.GetVerificationKeyByAuthID(ctx, data.GetDid(), data.GetAuthenticationKeyId())
 	if err != nil {
+		if errors.Is(err, diddoc.ErrDIDNotRegistered) {
+			return nil, status.Errorf(codes.NotFound, err.Error())
+		}
+
 		return resp, err
 	}
 
-	ok, err := s.checkSignature(ctx, data.GetDid(), data.GetAuthenticationKeyId(), hash, msg.GetSignature())
-	if err != nil {
+	if err := s.checkSignature(ctx, pubKey, msg.GetSignature(), data); err != nil {
 		return resp, err
-	}
-
-	if !ok {
-		return nil, status.Errorf(codes.PermissionDenied, "unauthorized")
 	}
 
 	vms := make([]types.VerificationMethod, 0, len(data.GetVerificationMethods()))

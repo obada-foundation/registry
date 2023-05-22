@@ -32,6 +32,25 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 			Signature: []byte(""),
 			Data: &pbdiddoc.SaveMetadataRequest_Data{
 				Did: DID,
+				Objects: append(make([]*pbdiddoc.Object, 0, 1), &pbdiddoc.Object{
+					Url: "https://ipfs.io/ipfs/QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
+					Metadata: map[string]string{
+						"type": string(asset.MainImage),
+					},
+					HashUnencryptedObject: "QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
+				}),
+			},
+		})
+
+		emptySignature(t, err)
+	}
+
+	t.Log("\tSaving metadata without authentification key ID")
+	{
+		_, err := tests.diddoc.SaveMetadata(ctx, &pbdiddoc.SaveMetadataRequest{
+			Signature: []byte("some fake signature"),
+			Data: &pbdiddoc.SaveMetadataRequest_Data{
+				Did: DID,
 				Objects: append(make([]*pbdiddoc.Object, 1), &pbdiddoc.Object{
 					Url: "https://ipfs.io/ipfs/QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
 					Metadata: map[string]string{
@@ -43,15 +62,16 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 			},
 		})
 
-		permissionDenied(t, err)
+		emptyAuthentificationId(t, err)
 	}
 
 	t.Log("\tSaving metadata without verification method")
 	{
 		_, err := tests.diddoc.SaveMetadata(ctx, &pbdiddoc.SaveMetadataRequest{
-			Signature: []byte("some signature"),
+			Signature: []byte("some fake signature"),
 			Data: &pbdiddoc.SaveMetadataRequest_Data{
-				Did: DID,
+				Did:                 DID,
+				AuthenticationKeyId: "",
 				Objects: append(make([]*pbdiddoc.Object, 1), &pbdiddoc.Object{
 					Url: "https://ipfs.io/ipfs/QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
 					Metadata: map[string]string{
@@ -76,7 +96,7 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 
 		regMsg := &pbdiddoc.RegisterRequest{
 			Did:                newDID,
-			VerificationMethod: make([]*pbdiddoc.VerificationMethod, 0),
+			VerificationMethod: make([]*pbdiddoc.VerificationMethod, 0, 1),
 			Authentication: []string{
 				fmt.Sprintf("%s#keys-1", newDID),
 			},
@@ -177,7 +197,8 @@ func (tests apiTests) notRegisteredDIDs(t *testing.T) {
 		_, err := tests.diddoc.SaveMetadata(ctx, &pbdiddoc.SaveMetadataRequest{
 			Signature: []byte("signature"),
 			Data: &pbdiddoc.SaveMetadataRequest_Data{
-				Did: DID,
+				Did:                 DID,
+				AuthenticationKeyId: fmt.Sprintf("%s#keys-1", DID),
 			},
 		})
 		notFoundDID(t, err)

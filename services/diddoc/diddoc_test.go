@@ -4,6 +4,7 @@ package diddoc_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/obada-foundation/registry/services/diddoc"
@@ -32,6 +33,8 @@ func Test_Service(t *testing.T) {
 	dbClient, deferFn := services.MakeDBClient(ctx, t)
 	defer deferFn()
 
+	validDID := "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88"
+
 	service := diddoc.NewService(dbClient, logger)
 	t.Logf("Test \"Register\" function")
 	{
@@ -46,22 +49,20 @@ func Test_Service(t *testing.T) {
 				err: sdkdid.ErrNotSupportedDIDMethod,
 			},
 			{
-				did: "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88",
+				did: validDID,
 				vm: []types.VerificationMethod{
 					{
-						ID:              "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88#keys-1",
+						ID:              fmt.Sprintf("%s#keys-1", validDID),
 						Type:            types.Ed25519VerificationKey2018JSONLD,
-						Controller:      "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88",
+						Controller:      validDID,
 						PublicKeyBase58: "",
 					},
 				},
-				a: []string{
-					"did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88#keys-1",
-				},
+				a:   []string{fmt.Sprintf("%s#keys-1", validDID)},
 				err: nil,
 			},
 			{
-				did: "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88",
+				did: validDID,
 				err: diddoc.ErrDIDAlreadyRegistered,
 			},
 		}
@@ -100,13 +101,11 @@ func Test_Service(t *testing.T) {
 
 	t.Logf("Test \"SaveMetadata\" function")
 	{
-		DID := "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb88"
-
 		t.Logf("\t Add first object to the metadata. Version: 1")
 		{
 			err := service.SaveMetadata(
 				ctx,
-				DID,
+				validDID,
 				[]asset.Object{
 					{
 						URL: "https://ipfs.io/ipfs/QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
@@ -119,7 +118,7 @@ func Test_Service(t *testing.T) {
 			)
 			require.NoError(t, err)
 
-			DIDDoc, err := service.Get(ctx, DID)
+			DIDDoc, err := service.Get(ctx, validDID)
 			require.NoError(t, err)
 			assert.Equal(t, 1, len(DIDDoc.MetadataHistory))
 			assert.Equal(t, 1, len(DIDDoc.MetadataHistory[1].Objects))
@@ -140,7 +139,7 @@ func Test_Service(t *testing.T) {
 		{
 			err := service.SaveMetadata(
 				ctx,
-				DID,
+				validDID,
 				[]asset.Object{
 					{
 						URL: "https://ipfs.io/ipfs/QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
@@ -160,7 +159,7 @@ func Test_Service(t *testing.T) {
 			)
 			require.NoError(t, err)
 
-			DIDDoc, err := service.Get(ctx, DID)
+			DIDDoc, err := service.Get(ctx, validDID)
 			require.NoError(t, err)
 			assert.Equal(t, 2, len(DIDDoc.MetadataHistory))
 			assert.Equal(t, 1, len(DIDDoc.MetadataHistory[1].Objects))
@@ -183,7 +182,7 @@ func Test_Service(t *testing.T) {
 		{
 			err := service.SaveMetadata(
 				ctx,
-				DID,
+				validDID,
 				[]asset.Object{
 					{
 						URL: "https://ipfs.io/ipfs/QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
@@ -196,7 +195,7 @@ func Test_Service(t *testing.T) {
 			)
 			require.NoError(t, err)
 
-			DIDDoc, err := service.Get(ctx, DID)
+			DIDDoc, err := service.Get(ctx, validDID)
 			require.NoError(t, err)
 			assert.Equal(t, 3, DIDDoc.Metadata.VersionID)
 			assert.Equal(t, DIDDoc.MetadataHistory[3].RootHash, DIDDoc.Metadata.RootHash)
@@ -208,11 +207,38 @@ func Test_Service(t *testing.T) {
 			t.Logf("\t DIDDoc: \n%s", string(j))
 		}
 
-		t.Logf("\t Remove a second object from the metadata. Version: 3")
+		t.Logf("\t Get metadata history")
 		{
-			_, err := service.GetMetadataHistory(ctx, DID)
+			_, err := service.GetMetadataHistory(ctx, validDID)
 			require.NoError(t, err)
 		}
 
+		t.Logf("Test \"GetVerificationKeyByAuthID\"")
+		{
+			_, err := service.GetVerificationKeyByAuthID(ctx, validDID, fmt.Sprintf("%s#keys-1", validDID))
+			require.NoError(t, err)
+
+			invalidDID := "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb81"
+			_, err = service.GetVerificationKeyByAuthID(ctx, invalidDID, fmt.Sprintf("%s#keys-1", invalidDID))
+			require.ErrorIs(t, err, diddoc.ErrDIDNotRegistered)
+
+			_, err = service.GetVerificationKeyByAuthID(ctx, validDID, fmt.Sprintf("%s#keys-2", validDID))
+			require.ErrorIs(t, err, diddoc.ErrVerificationKeyNotFound)
+		}
+
+		t.Logf("Test \"SaveVerificationMethods\"")
+		{
+			vms := append(make([]types.VerificationMethod, 0, 1), types.VerificationMethod{
+				ID:              fmt.Sprintf("%s#keys-1", validDID),
+				Type:            types.Ed25519VerificationKey2018JSONLD,
+				Controller:      validDID,
+				PublicKeyBase58: "",
+			})
+
+			a := []string{fmt.Sprintf("%s#keys-1", validDID)}
+
+			err := service.SaveVerificationMethods(ctx, validDID, vms, a)
+			require.NoError(t, err)
+		}
 	}
 }

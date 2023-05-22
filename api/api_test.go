@@ -127,5 +127,21 @@ func permissionDenied(t *testing.T, err error) {
 
 	assert.True(t, ok, "error is not a grpc error")
 	assert.Contains(t, "unauthorized", er.Message())
-	assert.Equal(t, codes.PermissionDenied, er.Code())
+	assert.Equal(t, codes.Unauthenticated, er.Code())
+}
+
+func emptySignature(t *testing.T, err error) {
+	er, ok := status.FromError(err)
+
+	assert.True(t, ok, "error is not a grpc error")
+	assert.Contains(t, "empty signature", er.Message())
+	assert.Equal(t, codes.InvalidArgument, er.Code())
+}
+
+func emptyAuthentificationId(t *testing.T, err error) {
+	er, ok := status.FromError(err)
+
+	assert.True(t, ok, "error is not a grpc error")
+	assert.Contains(t, "empty autherntication id", er.Message())
+	assert.Equal(t, codes.InvalidArgument, er.Code())
 }

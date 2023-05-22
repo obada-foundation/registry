@@ -7,9 +7,12 @@ import (
 	"strings"
 
 	immudb "github.com/codenotary/immudb/pkg/client"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/obada-foundation/registry/system/encoder"
 	"github.com/obada-foundation/registry/types"
 	"github.com/obada-foundation/sdkgo/asset"
+	"github.com/obada-foundation/sdkgo/base58"
 	sdkdid "github.com/obada-foundation/sdkgo/did"
 	"go.uber.org/zap"
 )
@@ -30,6 +33,9 @@ type DIDDoc interface {
 
 	// SaveVerificationMethods saves verification methods for patrticular DID
 	SaveVerificationMethods(ctx context.Context, did string, vms []types.VerificationMethod, a []string) error
+
+	// GetVerificationKeyByAuthID returns verification key by authentification ID
+	GetVerificationKeyByAuthID(ctx context.Context, did, authId string) (cryptotypes.PubKey, error)
 }
 
 // Service implements DIDDoc
@@ -161,6 +167,30 @@ func (s Service) Register(ctx context.Context, did string, vm []types.Verificati
 	s.logger.Debugf("New DID registered: %q", DID)
 
 	return nil
+}
+
+// GetVerificationKeyByAuthID implements DIDDoc GetVerificationKeyByAuthID
+func (s Service) GetVerificationKeyByAuthID(ctx context.Context, did, authId string) (cryptotypes.PubKey, error) {
+	DIDDoc, err := s.Get(ctx, did)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ak := range DIDDoc.Authentication {
+		if ak == authId {
+			for _, method := range DIDDoc.VerificationMethod {
+				if method.ID == authId {
+					pubKey := secp256k1.PubKey{
+						Key: base58.Decode(method.PublicKeyBase58),
+					}
+
+					return &pubKey, nil
+				}
+			}
+		}
+	}
+
+	return nil, ErrVerificationKeyNotFound
 }
 
 // Get implements DIDDoc Get
