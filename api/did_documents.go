@@ -256,9 +256,11 @@ func (s GRPCServer) SaveVerificationMethods(ctx context.Context, msg *pb.MsgSave
 
 	for _, vm := range data.GetVerificationMethods() {
 		vms = append(vms, types.VerificationMethod{
-			Context: vm.GetContext(),
-			ID:      vm.GetId(),
-			Type:    vm.GetType(),
+			Context:         vm.GetContext(),
+			ID:              vm.GetId(),
+			Type:            vm.GetType(),
+			Controller:      vm.GetController(),
+			PublicKeyBase58: vm.GetPublicKeyBase58(),
 		})
 	}
 

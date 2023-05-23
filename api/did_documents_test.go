@@ -48,7 +48,7 @@ func (tests apiTests) SaveVerificationMethods(t *testing.T) {
 		emptyAuthentificationID(t, err)
 	}
 
-	t.Log("\tSaving verification methods without prior DID registration")
+	t.Log("\tSave verification methods without prior DID registration")
 	{
 		_, err := tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
 			Signature: []byte("some fake signature"),
@@ -59,6 +59,72 @@ func (tests apiTests) SaveVerificationMethods(t *testing.T) {
 		})
 
 		unknownVerificationMethod(t, err)
+	}
+
+	t.Log("\tSave verification methods")
+	{
+		newDID := "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb84"
+
+		privKey := secp256k1.GenPrivKey()
+		pubKey := privKey.PubKey()
+
+		regMsg := &pbdiddoc.RegisterRequest{
+			Did: newDID,
+			VerificationMethod: append(make([]*pbdiddoc.VerificationMethod, 0, 1), &pbdiddoc.VerificationMethod{
+				Id:              fmt.Sprintf("%s#keys-1", newDID),
+				Controller:      newDID,
+				PublicKeyBase58: base58.Encode(pubKey.Bytes()),
+			}),
+			Authentication: []string{
+				fmt.Sprintf("%s#keys-1", newDID),
+			},
+		}
+
+		_, err := tests.diddoc.Register(ctx, regMsg)
+		require.NoError(t, err)
+
+		newPrivKey := secp256k1.GenPrivKey()
+		newPubKey := newPrivKey.PubKey()
+
+		data := &pbdiddoc.MsgSaveVerificationMethods_Data{
+			Did:                 newDID,
+			AuthenticationKeyId: fmt.Sprintf("%s#keys-1", newDID),
+			VerificationMethods: append(make([]*pbdiddoc.VerificationMethod, 0, 1), &pbdiddoc.VerificationMethod{
+				Id:              fmt.Sprintf("%s#keys-1", newDID),
+				Controller:      newDID,
+				PublicKeyBase58: base58.Encode(newPubKey.Bytes()),
+			}),
+			Authentication: []string{fmt.Sprintf("%s#keys-1", newDID)},
+		}
+
+		hash, err := api.ProtoDeterministicChecksum(data)
+		require.NoError(t, err)
+
+		signature, err := privKey.Sign(hash[:])
+		require.NoError(t, err)
+
+		_, err = tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: signature,
+			Data:      data,
+		})
+		require.NoError(t, err)
+
+		_, err = tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: signature,
+			Data:      data,
+		})
+
+		unauthenticated(t, err)
+
+		newSignature, err := newPrivKey.Sign(hash[:])
+		require.NoError(t, err)
+
+		_, err = tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: newSignature,
+			Data:      data,
+		})
+
+		require.NoError(t, err)
 	}
 }
 
