@@ -117,31 +117,36 @@ func Test_GRPCServer(t *testing.T) {
 	t.Run("notRegisteredDIDs", tests.notRegisteredDIDs)
 	t.Run("registerDID", tests.registerDID)
 	t.Run("saveMetadata", tests.saveMetadata)
+	t.Run("SaveVerificationMethods", tests.SaveVerificationMethods)
 
 	// Accounts test
 	t.Run("registerAccount", tests.registerAccount)
 }
 
 func permissionDenied(t *testing.T, err error) {
-	er, ok := status.FromError(err)
-
-	assert.True(t, ok, "error is not a grpc error")
-	assert.Contains(t, "unauthorized", er.Message())
-	assert.Equal(t, codes.Unauthenticated, er.Code())
+	checkErr(t, err, "unauthorized", codes.InvalidArgument)
 }
 
 func emptySignature(t *testing.T, err error) {
-	er, ok := status.FromError(err)
-
-	assert.True(t, ok, "error is not a grpc error")
-	assert.Contains(t, "empty signature", er.Message())
-	assert.Equal(t, codes.InvalidArgument, er.Code())
+	checkErr(t, err, "empty signature", codes.InvalidArgument)
 }
 
 func emptyAuthentificationID(t *testing.T, err error) {
+	checkErr(t, err, "empty autherntication id", codes.InvalidArgument)
+}
+
+func verificationKeyNotFound(t *testing.T, err error) {
+	checkErr(t, err, "verification key not found", codes.Unknown)
+}
+
+func notFoundDID(t *testing.T, err error) {
+	checkErr(t, err, "DID is not registered", codes.NotFound)
+}
+
+func checkErr(t *testing.T, err error, errMsg string, code codes.Code) {
 	er, ok := status.FromError(err)
 
 	assert.True(t, ok, "error is not a grpc error")
-	assert.Contains(t, "empty autherntication id", er.Message())
-	assert.Equal(t, codes.InvalidArgument, er.Code())
+	assert.Contains(t, errMsg, er.Message())
+	assert.Equal(t, code, er.Code())
 }

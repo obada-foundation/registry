@@ -47,6 +47,19 @@ func (tests apiTests) SaveVerificationMethods(t *testing.T) {
 
 		emptyAuthentificationID(t, err)
 	}
+
+	t.Log("\tSaving verification methods without prior DID registration")
+	{
+		_, err := tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: []byte("some fake signature"),
+			Data: &pbdiddoc.MsgSaveVerificationMethods_Data{
+				Did:                 DID,
+				AuthenticationKeyId: fmt.Sprintf("%skeys-1", DID),
+			},
+		})
+
+		verificationKeyNotFound(t, err)
+	}
 }
 
 func (tests apiTests) saveMetadata(t *testing.T) {
@@ -267,12 +280,4 @@ func (tests apiTests) registerDIDWithNoErrs(t *testing.T, did string) {
 		},
 	})
 	require.NoError(t, err)
-}
-
-func notFoundDID(t *testing.T, err error) {
-	er, ok := status.FromError(err)
-
-	assert.True(t, ok, "error is not a grpc error")
-	assert.Equal(t, "DID is not registered", er.Message())
-	assert.Equal(t, codes.NotFound, er.Code())
 }
