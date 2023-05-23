@@ -58,7 +58,7 @@ func (tests apiTests) SaveVerificationMethods(t *testing.T) {
 			},
 		})
 
-		verificationKeyNotFound(t, err)
+		unknownVerificationMethod(t, err)
 	}
 }
 
@@ -128,7 +128,7 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 			},
 		})
 
-		permissionDenied(t, err)
+		unauthenticated(t, err)
 	}
 
 	t.Log("\tSaving signed metadata")

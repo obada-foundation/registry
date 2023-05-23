@@ -12,5 +12,5 @@ var (
 	ErrDIDAlreadyRegistered = errors.New("DID was already registered")
 
 	// ErrVerificationKeyNotFound thows when requested verification key is not present in DID document
-	ErrVerificationKeyNotFound = errors.New("verification key not found")
+	ErrVerificationKeyNotFound = errors.New("unknown verification method")
 )

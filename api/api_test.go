@@ -123,8 +123,8 @@ func Test_GRPCServer(t *testing.T) {
 	t.Run("registerAccount", tests.registerAccount)
 }
 
-func permissionDenied(t *testing.T, err error) {
-	checkErr(t, err, "unauthorized", codes.InvalidArgument)
+func unauthenticated(t *testing.T, err error) {
+	checkErr(t, err, "unauthorized", codes.Unauthenticated)
 }
 
 func emptySignature(t *testing.T, err error) {
@@ -135,8 +135,9 @@ func emptyAuthentificationID(t *testing.T, err error) {
 	checkErr(t, err, "empty autherntication id", codes.InvalidArgument)
 }
 
-func verificationKeyNotFound(t *testing.T, err error) {
-	checkErr(t, err, "verification key not found", codes.Unknown)
+func unknownVerificationMethod(t *testing.T, err error) {
+	t.Log(err)
+	checkErr(t, err, "unknown verification method", codes.Unknown)
 }
 
 func notFoundDID(t *testing.T, err error) {
