@@ -17,6 +17,117 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+func (tests apiTests) SaveVerificationMethods(t *testing.T) {
+	ctx := context.Background()
+	DID := "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb83"
+
+	t.Log("\tRegister DID for testing metadata save")
+	tests.registerDIDWithNoErrs(t, DID)
+
+	t.Log("\tSaving verification methods")
+	{
+		_, err := tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: []byte(""),
+			Data: &pbdiddoc.MsgSaveVerificationMethods_Data{
+				Did: DID,
+			},
+		})
+
+		emptySignature(t, err)
+	}
+
+	t.Log("\tSaving verification methods without authentification key ID")
+	{
+		_, err := tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: []byte("some fake signature"),
+			Data: &pbdiddoc.MsgSaveVerificationMethods_Data{
+				Did: DID,
+			},
+		})
+
+		emptyAuthentificationID(t, err)
+	}
+
+	t.Log("\tSave verification methods without prior DID registration")
+	{
+		_, err := tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: []byte("some fake signature"),
+			Data: &pbdiddoc.MsgSaveVerificationMethods_Data{
+				Did:                 DID,
+				AuthenticationKeyId: fmt.Sprintf("%skeys-1", DID),
+			},
+		})
+
+		unknownVerificationMethod(t, err)
+	}
+
+	t.Log("\tSave verification methods")
+	{
+		newDID := "did:obada:64925be84b586363670c1f7e5ada86a37904e590d1f6570d834436331dd3eb84"
+
+		privKey := secp256k1.GenPrivKey()
+		pubKey := privKey.PubKey()
+
+		regMsg := &pbdiddoc.RegisterRequest{
+			Did: newDID,
+			VerificationMethod: append(make([]*pbdiddoc.VerificationMethod, 0, 1), &pbdiddoc.VerificationMethod{
+				Id:              fmt.Sprintf("%s#keys-1", newDID),
+				Controller:      newDID,
+				PublicKeyBase58: base58.Encode(pubKey.Bytes()),
+			}),
+			Authentication: []string{
+				fmt.Sprintf("%s#keys-1", newDID),
+			},
+		}
+
+		_, err := tests.diddoc.Register(ctx, regMsg)
+		require.NoError(t, err)
+
+		newPrivKey := secp256k1.GenPrivKey()
+		newPubKey := newPrivKey.PubKey()
+
+		data := &pbdiddoc.MsgSaveVerificationMethods_Data{
+			Did:                 newDID,
+			AuthenticationKeyId: fmt.Sprintf("%s#keys-1", newDID),
+			VerificationMethods: append(make([]*pbdiddoc.VerificationMethod, 0, 1), &pbdiddoc.VerificationMethod{
+				Id:              fmt.Sprintf("%s#keys-1", newDID),
+				Controller:      newDID,
+				PublicKeyBase58: base58.Encode(newPubKey.Bytes()),
+			}),
+			Authentication: []string{fmt.Sprintf("%s#keys-1", newDID)},
+		}
+
+		hash, err := api.ProtoDeterministicChecksum(data)
+		require.NoError(t, err)
+
+		signature, err := privKey.Sign(hash[:])
+		require.NoError(t, err)
+
+		_, err = tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: signature,
+			Data:      data,
+		})
+		require.NoError(t, err)
+
+		_, err = tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: signature,
+			Data:      data,
+		})
+
+		unauthenticated(t, err)
+
+		newSignature, err := newPrivKey.Sign(hash[:])
+		require.NoError(t, err)
+
+		_, err = tests.diddoc.SaveVerificationMethods(ctx, &pbdiddoc.MsgSaveVerificationMethods{
+			Signature: newSignature,
+			Data:      data,
+		})
+
+		require.NoError(t, err)
+	}
+}
+
 func (tests apiTests) saveMetadata(t *testing.T) {
 	t.Log("Save metadata tests...")
 
@@ -32,24 +143,23 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 			Signature: []byte(""),
 			Data: &pbdiddoc.SaveMetadataRequest_Data{
 				Did: DID,
-				Objects: append(make([]*pbdiddoc.Object, 1), &pbdiddoc.Object{
+				Objects: append(make([]*pbdiddoc.Object, 0, 1), &pbdiddoc.Object{
 					Url: "https://ipfs.io/ipfs/QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
 					Metadata: map[string]string{
 						"type": string(asset.MainImage),
 					},
 					HashUnencryptedObject: "QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
-				},
-				),
+				}),
 			},
 		})
 
-		permissionDenied(t, err)
+		emptySignature(t, err)
 	}
 
-	t.Log("\tSaving metadata without verification method")
+	t.Log("\tSaving metadata without authentification key ID")
 	{
 		_, err := tests.diddoc.SaveMetadata(ctx, &pbdiddoc.SaveMetadataRequest{
-			Signature: []byte("some signature"),
+			Signature: []byte("some fake signature"),
 			Data: &pbdiddoc.SaveMetadataRequest_Data{
 				Did: DID,
 				Objects: append(make([]*pbdiddoc.Object, 1), &pbdiddoc.Object{
@@ -63,7 +173,28 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 			},
 		})
 
-		permissionDenied(t, err)
+		emptyAuthentificationID(t, err)
+	}
+
+	t.Log("\tSaving metadata without verification method")
+	{
+		_, err := tests.diddoc.SaveMetadata(ctx, &pbdiddoc.SaveMetadataRequest{
+			Signature: []byte("some fake signature"),
+			Data: &pbdiddoc.SaveMetadataRequest_Data{
+				Did:                 DID,
+				AuthenticationKeyId: fmt.Sprintf("%s#keys-1", DID),
+				Objects: append(make([]*pbdiddoc.Object, 1), &pbdiddoc.Object{
+					Url: "https://ipfs.io/ipfs/QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
+					Metadata: map[string]string{
+						"type": string(asset.MainImage),
+					},
+					HashUnencryptedObject: "QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
+				},
+				),
+			},
+		})
+
+		unauthenticated(t, err)
 	}
 
 	t.Log("\tSaving signed metadata")
@@ -76,7 +207,7 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 
 		regMsg := &pbdiddoc.RegisterRequest{
 			Did:                newDID,
-			VerificationMethod: make([]*pbdiddoc.VerificationMethod, 0),
+			VerificationMethod: make([]*pbdiddoc.VerificationMethod, 0, 1),
 			Authentication: []string{
 				fmt.Sprintf("%s#keys-1", newDID),
 			},
@@ -91,8 +222,9 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 		require.NoError(t, err)
 
 		data := &pbdiddoc.SaveMetadataRequest_Data{
-			Did:     newDID,
-			Objects: make([]*pbdiddoc.Object, 0),
+			Did:                 newDID,
+			Objects:             make([]*pbdiddoc.Object, 0),
+			AuthenticationKeyId: regMsg.Authentication[0],
 		}
 
 		data.Objects = append(data.Objects, &pbdiddoc.Object{
@@ -104,7 +236,7 @@ func (tests apiTests) saveMetadata(t *testing.T) {
 			HashUnencryptedObject: "QmQqzMTavQgT4f4T5v6PWBp7XNKtoPmC9jvn12WPT3gkSE",
 		})
 
-		hash, err := api.MetadataDeterministicChecksum(data)
+		hash, err := api.ProtoDeterministicChecksum(data)
 		require.NoError(t, err)
 
 		signature, err := privKey.Sign(hash[:])
@@ -176,7 +308,8 @@ func (tests apiTests) notRegisteredDIDs(t *testing.T) {
 		_, err := tests.diddoc.SaveMetadata(ctx, &pbdiddoc.SaveMetadataRequest{
 			Signature: []byte("signature"),
 			Data: &pbdiddoc.SaveMetadataRequest_Data{
-				Did: DID,
+				Did:                 DID,
+				AuthenticationKeyId: fmt.Sprintf("%s#keys-1", DID),
 			},
 		})
 		notFoundDID(t, err)
@@ -213,12 +346,4 @@ func (tests apiTests) registerDIDWithNoErrs(t *testing.T, did string) {
 		},
 	})
 	require.NoError(t, err)
-}
-
-func notFoundDID(t *testing.T, err error) {
-	er, ok := status.FromError(err)
-
-	assert.True(t, ok, "error is not a grpc error")
-	assert.Equal(t, "DID is not registered", er.Message())
-	assert.Equal(t, codes.NotFound, er.Code())
 }

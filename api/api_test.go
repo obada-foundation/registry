@@ -117,15 +117,37 @@ func Test_GRPCServer(t *testing.T) {
 	t.Run("notRegisteredDIDs", tests.notRegisteredDIDs)
 	t.Run("registerDID", tests.registerDID)
 	t.Run("saveMetadata", tests.saveMetadata)
+	t.Run("SaveVerificationMethods", tests.SaveVerificationMethods)
 
 	// Accounts test
 	t.Run("registerAccount", tests.registerAccount)
 }
 
-func permissionDenied(t *testing.T, err error) {
+func unauthenticated(t *testing.T, err error) {
+	checkErr(t, err, "unauthorized", codes.Unauthenticated)
+}
+
+func emptySignature(t *testing.T, err error) {
+	checkErr(t, err, "empty signature", codes.InvalidArgument)
+}
+
+func emptyAuthentificationID(t *testing.T, err error) {
+	checkErr(t, err, "empty autherntication id", codes.InvalidArgument)
+}
+
+func unknownVerificationMethod(t *testing.T, err error) {
+	t.Log(err)
+	checkErr(t, err, "unknown verification method", codes.Unknown)
+}
+
+func notFoundDID(t *testing.T, err error) {
+	checkErr(t, err, "DID is not registered", codes.NotFound)
+}
+
+func checkErr(t *testing.T, err error, errMsg string, code codes.Code) {
 	er, ok := status.FromError(err)
 
 	assert.True(t, ok, "error is not a grpc error")
-	assert.Contains(t, "unauthorized", er.Message())
-	assert.Equal(t, codes.PermissionDenied, er.Code())
+	assert.Contains(t, errMsg, er.Message())
+	assert.Equal(t, code, er.Code())
 }

@@ -224,6 +224,74 @@
                         "type": "object",
                         "$ref": "#/definitions/diddocObject"
                       }
+                    },
+                    "authenticationKeyId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DIDDoc"
+        ]
+      }
+    },
+    "/api/v1.0/diddoc/{did}/verification-methods": {
+      "post": {
+        "operationId": "DIDDoc_SaveVerificationMethods",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/diddocSaveVerificationMethodsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "did",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "signature": {
+                  "type": "string",
+                  "format": "byte"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "verificationMethods": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/diddocVerificationMethod"
+                      }
+                    },
+                    "authentication": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "authenticationKeyId": {
+                      "type": "string"
                     }
                   }
                 }
@@ -238,21 +306,6 @@
     }
   },
   "definitions": {
-    "SaveMetadataRequestData": {
-      "type": "object",
-      "properties": {
-        "did": {
-          "type": "string"
-        },
-        "objects": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/diddocObject"
-          }
-        }
-      }
-    },
     "accountGetPublicKeyResponse": {
       "type": "object",
       "properties": {
@@ -404,6 +457,30 @@
         }
       }
     },
+    "diddocMsgSaveVerificationMethodsData": {
+      "type": "object",
+      "properties": {
+        "did": {
+          "type": "string"
+        },
+        "verificationMethods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/diddocVerificationMethod"
+          }
+        },
+        "authentication": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "authenticationKeyId": {
+          "type": "string"
+        }
+      }
+    },
     "diddocObject": {
       "type": "object",
       "properties": {
@@ -464,7 +541,28 @@
     "diddocRegisterResponse": {
       "type": "object"
     },
+    "diddocSaveMetadataRequestData": {
+      "type": "object",
+      "properties": {
+        "did": {
+          "type": "string"
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/diddocObject"
+          }
+        },
+        "authenticationKeyId": {
+          "type": "string"
+        }
+      }
+    },
     "diddocSaveMetadataResponse": {
+      "type": "object"
+    },
+    "diddocSaveVerificationMethodsResponse": {
       "type": "object"
     },
     "diddocService": {
