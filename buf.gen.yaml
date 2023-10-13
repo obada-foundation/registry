@@ -19,5 +19,5 @@ plugins:
 
 # generate openapi documentation for api
 - plugin: buf.build/grpc-ecosystem/openapiv2
-  out: openapi
+  out: cmd/swagger-ui
   opt: allow_merge=true,merge_file_name=api

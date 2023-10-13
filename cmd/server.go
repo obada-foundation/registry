@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
+	"embed"
 	"github.com/getsentry/sentry-go"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/obada-foundation/registry/api"
@@ -20,6 +22,9 @@ import (
 	"github.com/obada-foundation/registry/system/db"
 	//	"go.uber.org/zap"
 )
+
+//go:embed swagger-ui/*
+var swaggerUI embed.FS
 
 // ServerCommand with command line flags and env vars
 type ServerCommand struct {
@@ -63,6 +68,26 @@ type ImmuDBGroup struct {
 	User   string `long:"user" env:"USER" default:"immudb" description:"immudb user"`
 	Pass   string `long:"password" env:"PASSWORD" default:"immudb" description:"immudb password"`
 	DBName string `long:"dbname" env:"NAME" default:"defaultdb" description:"immudb database name"`
+}
+
+func allowCORS(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if origin := r.Header.Get("Origin"); origin != "" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			if r.Method == "OPTIONS" && r.Header.Get("Access-Control-Request-Method") != "" {
+				preflightHandler(w, r)
+				return
+			}
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+func preflightHandler(w http.ResponseWriter, r *http.Request) {
+	headers := []string{"Content-Type", "Accept", "Authorization"}
+	w.Header().Set("Access-Control-Allow-Headers", strings.Join(headers, ","))
+	methods := []string{"GET", "HEAD", "POST", "PUT", "DELETE"}
+	w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))
 }
 
 // Execute is the entry point for "server" command, called by flag parser
@@ -128,7 +153,8 @@ func (s *ServerCommand) Execute(_ []string) error {
 	}()
 
 	mux := http.NewServeMux()
-	mux.Handle("/", grpcMux)
+	mux.Handle("/", allowCORS(grpcMux))
+	mux.Handle("/swagger-ui/", http.FileServer(http.FS(swaggerUI)))
 
 	go func() {
 		listenAddr := fmt.Sprintf("%s:%d", s.HTTPServer.Address, s.HTTPServer.Port)
