@@ -22,7 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AccountClient interface {
+	// RegisterAccount RPC method allows a user to register an OBADA blockchain account.
 	RegisterAccount(ctx context.Context, in *RegisterAccountRequest, opts ...grpc.CallOption) (*RegisterAccountResponse, error)
+	// The GetPublicKey RPC method allows a client to query the public key associated with a given blockchain address.
 	GetPublicKey(ctx context.Context, in *GetPublicKeyRequest, opts ...grpc.CallOption) (*GetPublicKeyResponse, error)
 }
 
@@ -56,7 +58,9 @@ func (c *accountClient) GetPublicKey(ctx context.Context, in *GetPublicKeyReques
 // All implementations must embed UnimplementedAccountServer
 // for forward compatibility
 type AccountServer interface {
+	// RegisterAccount RPC method allows a user to register an OBADA blockchain account.
 	RegisterAccount(context.Context, *RegisterAccountRequest) (*RegisterAccountResponse, error)
+	// The GetPublicKey RPC method allows a client to query the public key associated with a given blockchain address.
 	GetPublicKey(context.Context, *GetPublicKeyRequest) (*GetPublicKeyResponse, error)
 	mustEmbedUnimplementedAccountServer()
 }

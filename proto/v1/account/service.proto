@@ -4,22 +4,35 @@ package v1.account;
 option go_package = "github.com/obada-foundation/registry/services/v1/account";
 
 import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
 
+// RegisterAccountRequest is the payload used to request the registration of a new account.
+// A public key is required for the registration process.
 message RegisterAccountRequest {
-  string pubkey = 1;
+  // Public key of the account to be registered. This field is mandatory.
+  string pubkey = 1 [(google.api.field_behavior) = REQUIRED]; 
 }
 
+// RegisterAccountResponse is the response payload received after attempting account registration.
+// Currently, this message doesn't convey any data but can be expanded to include fields such as registration status in future iterations.
 message RegisterAccountResponse {
 }
 
+// GetPublicKeyRequest is utilized to request the retrieval of a public key associated with an existing account.
+// It requires an account address as input to identify the account in question.
 message GetPublicKeyRequest {
-  string address = 1;
+  // OBADA blockchain address of the account for which the public key is requested. This field is mandatory.
+  string address = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
+// GetPublicKeyResponse returns the public key associated with an account address.
+// It carries the retrieved public key in the response.
 message GetPublicKeyResponse {
+  // The public key associated with the queried account address.
   string pubkey = 1;
 }
 
+// Service Account provides RPC methods related to account functionalities, including registration and public key retrieval.
 service Account {
   // RegisterAccount RPC method allows a user to register an OBADA blockchain account.
   rpc RegisterAccount (RegisterAccountRequest) returns (RegisterAccountResponse) {
