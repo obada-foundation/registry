@@ -1,61 +1,145 @@
 syntax = "proto3";
+
+// Package v1.diddoc provides protocol buffers specifications 
+// for dealing with decentralized identifier documents (DID Documents) in alignment with the DID specification.
 package v1.diddoc;
 
 option go_package = "github.com/obada-foundation/registry/services/v1/diddoc";
 
 import "google/api/annotations.proto";
 
+// DIDDocument defines a standard application-independent format. 
+// It is a set of data that provides the means for a DID subject to prove control over it.
+// Refer: https://www.w3.org/TR/did-core/
 message DIDDocument {
+  // The context field helps define the document's use of vocabularies via URIs.
   repeated string context = 1;
+
+  // The id field is a string that uniquely identifies the DID subject.
   string id = 2;
+
+  // A list of controller DIDs, indicates parties that have control over the DID Document.
   repeated string controller = 3;
+
+  // The verification method array includes public keys and may include other verification methods.
   repeated VerificationMethod verification_method = 4;
+
+  // Reference to verification method(s), used for authentication.
   repeated string authentication = 5;
+
+  // Reference to verification method(s), used for assertion.
   repeated string assertion_method = 6;
+
+  // Reference to verification method(s), used for capability invocation.
   repeated string capability_invocation = 7;
+
+  // Reference to verification method(s), used for capability delegation.
   repeated string capability_delegation = 8;
+
+  // Reference to verification method(s), used for key agreement.
   repeated string key_agreement = 9;
+
+  // Service endpoints related to the DID subject.
   repeated Service service = 10;
+
+  // Alternate identifiers for the DID subject.
   repeated string also_known_as = 11;
+
+  // Metadata about the DID document.
   Metadata metadata = 12;
 }
 
+// VerificationMethod is employed to check the validity of a verification relationship. 
+// These could include, but are not limited to, cryptographic public keys and services.
 message VerificationMethod {
+  // Context that relates to the verification method.
   repeated string context = 1;
+
+  // Identifier of the verification method.
   string id = 2;
+
+  // Type of verification method (e.g., Ed25519VerificationKey2018).
   string type = 3;
+
+  // Controller of the verification method.
   string controller = 4;
+
+  // Public key details in JWK format.
   map<string, string> public_key_jwk = 5;
+
+  // Public key encoded in multibase format.
   string public_key_multibase = 6;
+
+  // Public key encoded in base58 format.
   string public_key_base58 = 7;
 }
 
+// Service defines service endpoints for a DID subject, with types and endpoint URIs.
+// These services can be any type of service the entity wishes to advertise, 
+// including decentralized identity management services for further discovery, authentication, 
+// authorization, or interaction.
 message Service {
+  // Context that relates to the service.
   string context = 1;
+
+  // Identifier of the service endpoint.
   string id = 2;
+
+  // Type of service endpoint (e.g., VerifiableCredentialService).
   string type = 3;
+
+  // The URI of the service endpoint.
   repeated string service_endpoint = 4;
 }
 
+// Metadata represents meta-information related to the DID Document and its activities.
 message Metadata {
+  // Version id of the metadata.
   int32 version_id = 1;
+
+  // Hash representing the version of the metadata.
   string version_hash = 2;
+
+  // Root hash of the DID Document.
   string root_hash = 3;
+
+  // Additional objects related to the DID Document.
   repeated Object objects = 5;
 }
 
+// Object represents data structures that might be associated with metadata, 
+// providing additional details that can be independently hashed and referenced.
 message Object {
+  // URL where the object can be found or retrieved.
   string url = 1;
+
+  // Hash of the encrypted data object.
   string hash_encrypted_data_object = 2;
-  string hash_unencrypted_object = 3;          
+
+  // Hash of the unencrypted object.
+  string hash_unencrypted_object = 3;
+
+  // Additional metadata associated with the object.
   map<string, string> metadata = 4;
-  string hash_unencrypted_metadata = 5;  
-  string hash_encrypted_metadata = 6;    
+
+  // Hash of the unencrypted metadata.
+  string hash_unencrypted_metadata = 5;
+
+  // Hash of the encrypted metadata.
+  string hash_encrypted_metadata = 6;
+
+  // Hash of the data object itself.
   string data_object_hash = 7;     
 }
 
+// DataArray encapsulates arrays of data, with metadata history and versions.
 message DataArray {
-  string version_hash = 1;  
-  string root_hash = 2;   
+  // Hash representing the version of the data.
+  string version_hash = 1;
+  
+  // Root hash of the data set.
+  string root_hash = 2;
+
+  // Array of objects associated with the data.
   repeated Object objects = 3; 
 }

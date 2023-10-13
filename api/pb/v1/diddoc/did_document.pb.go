@@ -4,6 +4,9 @@
 // 	protoc        (unknown)
 // source: v1/diddoc/did_document.proto
 
+// Package v1.diddoc provides protocol buffers specifications
+// for dealing with decentralized identifier documents (DID Documents) in alignment with the DID specification.
+
 package diddoc
 
 import (
@@ -21,23 +24,38 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// DIDDocument defines a standard application-independent format.
+// It is a set of data that provides the means for a DID subject to prove control over it.
+// Refer: https://www.w3.org/TR/did-core/
 type DIDDocument struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Context              []string              `protobuf:"bytes,1,rep,name=context,proto3" json:"context,omitempty"`
-	Id                   string                `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	Controller           []string              `protobuf:"bytes,3,rep,name=controller,proto3" json:"controller,omitempty"`
-	VerificationMethod   []*VerificationMethod `protobuf:"bytes,4,rep,name=verification_method,json=verificationMethod,proto3" json:"verification_method,omitempty"`
-	Authentication       []string              `protobuf:"bytes,5,rep,name=authentication,proto3" json:"authentication,omitempty"`
-	AssertionMethod      []string              `protobuf:"bytes,6,rep,name=assertion_method,json=assertionMethod,proto3" json:"assertion_method,omitempty"`
-	CapabilityInvocation []string              `protobuf:"bytes,7,rep,name=capability_invocation,json=capabilityInvocation,proto3" json:"capability_invocation,omitempty"`
-	CapabilityDelegation []string              `protobuf:"bytes,8,rep,name=capability_delegation,json=capabilityDelegation,proto3" json:"capability_delegation,omitempty"`
-	KeyAgreement         []string              `protobuf:"bytes,9,rep,name=key_agreement,json=keyAgreement,proto3" json:"key_agreement,omitempty"`
-	Service              []*Service            `protobuf:"bytes,10,rep,name=service,proto3" json:"service,omitempty"`
-	AlsoKnownAs          []string              `protobuf:"bytes,11,rep,name=also_known_as,json=alsoKnownAs,proto3" json:"also_known_as,omitempty"`
-	Metadata             *Metadata             `protobuf:"bytes,12,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// The context field helps define the document's use of vocabularies via URIs.
+	Context []string `protobuf:"bytes,1,rep,name=context,proto3" json:"context,omitempty"`
+	// The id field is a string that uniquely identifies the DID subject.
+	Id string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	// A list of controller DIDs, indicates parties that have control over the DID Document.
+	Controller []string `protobuf:"bytes,3,rep,name=controller,proto3" json:"controller,omitempty"`
+	// The verification method array includes public keys and may include other verification methods.
+	VerificationMethod []*VerificationMethod `protobuf:"bytes,4,rep,name=verification_method,json=verificationMethod,proto3" json:"verification_method,omitempty"`
+	// Reference to verification method(s), used for authentication.
+	Authentication []string `protobuf:"bytes,5,rep,name=authentication,proto3" json:"authentication,omitempty"`
+	// Reference to verification method(s), used for assertion.
+	AssertionMethod []string `protobuf:"bytes,6,rep,name=assertion_method,json=assertionMethod,proto3" json:"assertion_method,omitempty"`
+	// Reference to verification method(s), used for capability invocation.
+	CapabilityInvocation []string `protobuf:"bytes,7,rep,name=capability_invocation,json=capabilityInvocation,proto3" json:"capability_invocation,omitempty"`
+	// Reference to verification method(s), used for capability delegation.
+	CapabilityDelegation []string `protobuf:"bytes,8,rep,name=capability_delegation,json=capabilityDelegation,proto3" json:"capability_delegation,omitempty"`
+	// Reference to verification method(s), used for key agreement.
+	KeyAgreement []string `protobuf:"bytes,9,rep,name=key_agreement,json=keyAgreement,proto3" json:"key_agreement,omitempty"`
+	// Service endpoints related to the DID subject.
+	Service []*Service `protobuf:"bytes,10,rep,name=service,proto3" json:"service,omitempty"`
+	// Alternate identifiers for the DID subject.
+	AlsoKnownAs []string `protobuf:"bytes,11,rep,name=also_known_as,json=alsoKnownAs,proto3" json:"also_known_as,omitempty"`
+	// Metadata about the DID document.
+	Metadata *Metadata `protobuf:"bytes,12,opt,name=metadata,proto3" json:"metadata,omitempty"`
 }
 
 func (x *DIDDocument) Reset() {
@@ -156,18 +174,27 @@ func (x *DIDDocument) GetMetadata() *Metadata {
 	return nil
 }
 
+// VerificationMethod is employed to check the validity of a verification relationship.
+// These could include, but are not limited to, cryptographic public keys and services.
 type VerificationMethod struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Context            []string          `protobuf:"bytes,1,rep,name=context,proto3" json:"context,omitempty"`
-	Id                 string            `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	Type               string            `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
-	Controller         string            `protobuf:"bytes,4,opt,name=controller,proto3" json:"controller,omitempty"`
-	PublicKeyJwk       map[string]string `protobuf:"bytes,5,rep,name=public_key_jwk,json=publicKeyJwk,proto3" json:"public_key_jwk,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	PublicKeyMultibase string            `protobuf:"bytes,6,opt,name=public_key_multibase,json=publicKeyMultibase,proto3" json:"public_key_multibase,omitempty"`
-	PublicKeyBase58    string            `protobuf:"bytes,7,opt,name=public_key_base58,json=publicKeyBase58,proto3" json:"public_key_base58,omitempty"`
+	// Context that relates to the verification method.
+	Context []string `protobuf:"bytes,1,rep,name=context,proto3" json:"context,omitempty"`
+	// Identifier of the verification method.
+	Id string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	// Type of verification method (e.g., Ed25519VerificationKey2018).
+	Type string `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	// Controller of the verification method.
+	Controller string `protobuf:"bytes,4,opt,name=controller,proto3" json:"controller,omitempty"`
+	// Public key details in JWK format.
+	PublicKeyJwk map[string]string `protobuf:"bytes,5,rep,name=public_key_jwk,json=publicKeyJwk,proto3" json:"public_key_jwk,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// Public key encoded in multibase format.
+	PublicKeyMultibase string `protobuf:"bytes,6,opt,name=public_key_multibase,json=publicKeyMultibase,proto3" json:"public_key_multibase,omitempty"`
+	// Public key encoded in base58 format.
+	PublicKeyBase58 string `protobuf:"bytes,7,opt,name=public_key_base58,json=publicKeyBase58,proto3" json:"public_key_base58,omitempty"`
 }
 
 func (x *VerificationMethod) Reset() {
@@ -251,14 +278,22 @@ func (x *VerificationMethod) GetPublicKeyBase58() string {
 	return ""
 }
 
+// Service defines service endpoints for a DID subject, with types and endpoint URIs.
+// These services can be any type of service the entity wishes to advertise,
+// including decentralized identity management services for further discovery, authentication,
+// authorization, or interaction.
 type Service struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Context         string   `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
-	Id              string   `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	Type            string   `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	// Context that relates to the service.
+	Context string `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
+	// Identifier of the service endpoint.
+	Id string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	// Type of service endpoint (e.g., VerifiableCredentialService).
+	Type string `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	// The URI of the service endpoint.
 	ServiceEndpoint []string `protobuf:"bytes,4,rep,name=service_endpoint,json=serviceEndpoint,proto3" json:"service_endpoint,omitempty"`
 }
 
@@ -322,15 +357,20 @@ func (x *Service) GetServiceEndpoint() []string {
 	return nil
 }
 
+// Metadata represents meta-information related to the DID Document and its activities.
 type Metadata struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	VersionId   int32     `protobuf:"varint,1,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	VersionHash string    `protobuf:"bytes,2,opt,name=version_hash,json=versionHash,proto3" json:"version_hash,omitempty"`
-	RootHash    string    `protobuf:"bytes,3,opt,name=root_hash,json=rootHash,proto3" json:"root_hash,omitempty"`
-	Objects     []*Object `protobuf:"bytes,5,rep,name=objects,proto3" json:"objects,omitempty"`
+	// Version id of the metadata.
+	VersionId int32 `protobuf:"varint,1,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	// Hash representing the version of the metadata.
+	VersionHash string `protobuf:"bytes,2,opt,name=version_hash,json=versionHash,proto3" json:"version_hash,omitempty"`
+	// Root hash of the DID Document.
+	RootHash string `protobuf:"bytes,3,opt,name=root_hash,json=rootHash,proto3" json:"root_hash,omitempty"`
+	// Additional objects related to the DID Document.
+	Objects []*Object `protobuf:"bytes,5,rep,name=objects,proto3" json:"objects,omitempty"`
 }
 
 func (x *Metadata) Reset() {
@@ -393,18 +433,27 @@ func (x *Metadata) GetObjects() []*Object {
 	return nil
 }
 
+// Object represents data structures that might be associated with metadata,
+// providing additional details that can be independently hashed and referenced.
 type Object struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url                     string            `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	HashEncryptedDataObject string            `protobuf:"bytes,2,opt,name=hash_encrypted_data_object,json=hashEncryptedDataObject,proto3" json:"hash_encrypted_data_object,omitempty"`
-	HashUnencryptedObject   string            `protobuf:"bytes,3,opt,name=hash_unencrypted_object,json=hashUnencryptedObject,proto3" json:"hash_unencrypted_object,omitempty"`
-	Metadata                map[string]string `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	HashUnencryptedMetadata string            `protobuf:"bytes,5,opt,name=hash_unencrypted_metadata,json=hashUnencryptedMetadata,proto3" json:"hash_unencrypted_metadata,omitempty"`
-	HashEncryptedMetadata   string            `protobuf:"bytes,6,opt,name=hash_encrypted_metadata,json=hashEncryptedMetadata,proto3" json:"hash_encrypted_metadata,omitempty"`
-	DataObjectHash          string            `protobuf:"bytes,7,opt,name=data_object_hash,json=dataObjectHash,proto3" json:"data_object_hash,omitempty"`
+	// URL where the object can be found or retrieved.
+	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	// Hash of the encrypted data object.
+	HashEncryptedDataObject string `protobuf:"bytes,2,opt,name=hash_encrypted_data_object,json=hashEncryptedDataObject,proto3" json:"hash_encrypted_data_object,omitempty"`
+	// Hash of the unencrypted object.
+	HashUnencryptedObject string `protobuf:"bytes,3,opt,name=hash_unencrypted_object,json=hashUnencryptedObject,proto3" json:"hash_unencrypted_object,omitempty"`
+	// Additional metadata associated with the object.
+	Metadata map[string]string `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// Hash of the unencrypted metadata.
+	HashUnencryptedMetadata string `protobuf:"bytes,5,opt,name=hash_unencrypted_metadata,json=hashUnencryptedMetadata,proto3" json:"hash_unencrypted_metadata,omitempty"`
+	// Hash of the encrypted metadata.
+	HashEncryptedMetadata string `protobuf:"bytes,6,opt,name=hash_encrypted_metadata,json=hashEncryptedMetadata,proto3" json:"hash_encrypted_metadata,omitempty"`
+	// Hash of the data object itself.
+	DataObjectHash string `protobuf:"bytes,7,opt,name=data_object_hash,json=dataObjectHash,proto3" json:"data_object_hash,omitempty"`
 }
 
 func (x *Object) Reset() {
@@ -488,14 +537,18 @@ func (x *Object) GetDataObjectHash() string {
 	return ""
 }
 
+// DataArray encapsulates arrays of data, with metadata history and versions.
 type DataArray struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	VersionHash string    `protobuf:"bytes,1,opt,name=version_hash,json=versionHash,proto3" json:"version_hash,omitempty"`
-	RootHash    string    `protobuf:"bytes,2,opt,name=root_hash,json=rootHash,proto3" json:"root_hash,omitempty"`
-	Objects     []*Object `protobuf:"bytes,3,rep,name=objects,proto3" json:"objects,omitempty"`
+	// Hash representing the version of the data.
+	VersionHash string `protobuf:"bytes,1,opt,name=version_hash,json=versionHash,proto3" json:"version_hash,omitempty"`
+	// Root hash of the data set.
+	RootHash string `protobuf:"bytes,2,opt,name=root_hash,json=rootHash,proto3" json:"root_hash,omitempty"`
+	// Array of objects associated with the data.
+	Objects []*Object `protobuf:"bytes,3,rep,name=objects,proto3" json:"objects,omitempty"`
 }
 
 func (x *DataArray) Reset() {

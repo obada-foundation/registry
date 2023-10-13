@@ -4,6 +4,8 @@
 // 	protoc        (unknown)
 // source: v1/diddoc/service.proto
 
+// Package v1.diddoc defines the version 1 of the DID document service API.
+
 package diddoc
 
 import (
@@ -22,15 +24,20 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// RegisterRequest is the payload for requesting the registration of a new DID document.
 type RegisterRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Did                string                `protobuf:"bytes,1,opt,name=did,proto3" json:"did,omitempty"`
+	// The decentralized identifier for the DID document to be registered.
+	Did string `protobuf:"bytes,1,opt,name=did,proto3" json:"did,omitempty"`
+	// Methods used to verify that the DID subject agrees with the DID document.
 	VerificationMethod []*VerificationMethod `protobuf:"bytes,2,rep,name=verification_method,json=verificationMethod,proto3" json:"verification_method,omitempty"`
-	Authentication     []string              `protobuf:"bytes,3,rep,name=authentication,proto3" json:"authentication,omitempty"`
-	Service            []*Service            `protobuf:"bytes,4,rep,name=service,proto3" json:"service,omitempty"`
+	// List of identifiers used for authentication.
+	Authentication []string `protobuf:"bytes,3,rep,name=authentication,proto3" json:"authentication,omitempty"`
+	// Service endpoints related to the DID.
+	Service []*Service `protobuf:"bytes,4,rep,name=service,proto3" json:"service,omitempty"`
 }
 
 func (x *RegisterRequest) Reset() {
@@ -93,6 +100,8 @@ func (x *RegisterRequest) GetService() []*Service {
 	return nil
 }
 
+// RegisterResponse is the response payload for the registration request.
+// Currently empty but can be expanded in future iterations.
 type RegisterResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -131,11 +140,13 @@ func (*RegisterResponse) Descriptor() ([]byte, []int) {
 	return file_v1_diddoc_service_proto_rawDescGZIP(), []int{1}
 }
 
+// GetRequest is used to request a DID document using its identifier.
 type GetRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// The decentralized identifier of the DID document to retrieve.
 	Did string `protobuf:"bytes,1,opt,name=did,proto3" json:"did,omitempty"`
 }
 
@@ -178,11 +189,13 @@ func (x *GetRequest) GetDid() string {
 	return ""
 }
 
+// GetResponse contains the DID document associated with the provided identifier.
 type GetResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// The DID document corresponding to the requested identifier.
 	Document *DIDDocument `protobuf:"bytes,1,opt,name=document,proto3" json:"document,omitempty"`
 }
 
@@ -225,11 +238,13 @@ func (x *GetResponse) GetDocument() *DIDDocument {
 	return nil
 }
 
+// GetMetadataHistoryRequest is used to request the history of metadata of a DID document.
 type GetMetadataHistoryRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// The decentralized identifier of the DID document whose history is requested.
 	Did string `protobuf:"bytes,1,opt,name=did,proto3" json:"did,omitempty"`
 }
 
@@ -272,11 +287,13 @@ func (x *GetMetadataHistoryRequest) GetDid() string {
 	return ""
 }
 
+// GetMetadataHistoryResponse contains the history of metadata changes of the DID document.
 type GetMetadataHistoryResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Map containing the history of metadata changes. The key is a timestamp and the value is a DataArray object representing the changes at that time.
 	MetadataHistory map[int32]*DataArray `protobuf:"bytes,1,rep,name=metadata_history,json=metadataHistory,proto3" json:"metadata_history,omitempty" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
@@ -319,13 +336,16 @@ func (x *GetMetadataHistoryResponse) GetMetadataHistory() map[int32]*DataArray {
 	return nil
 }
 
+// SaveMetadataRequest is used to store metadata related to a DID document.
 type SaveMetadataRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Signature []byte                    `protobuf:"bytes,1,opt,name=signature,proto3" json:"signature,omitempty"`
-	Data      *SaveMetadataRequest_Data `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	// The signature of the data.
+	Signature []byte `protobuf:"bytes,1,opt,name=signature,proto3" json:"signature,omitempty"`
+	// The metadata records
+	Data *SaveMetadataRequest_Data `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *SaveMetadataRequest) Reset() {
@@ -374,6 +394,8 @@ func (x *SaveMetadataRequest) GetData() *SaveMetadataRequest_Data {
 	return nil
 }
 
+// SaveMetadataResponse is the response payload after attempting to save metadata.
+// Currently empty but can be expanded in future iterations.
 type SaveMetadataResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -412,13 +434,16 @@ func (*SaveMetadataResponse) Descriptor() ([]byte, []int) {
 	return file_v1_diddoc_service_proto_rawDescGZIP(), []int{7}
 }
 
+// MsgSaveVerificationMethods represents a request to store verification methods.
 type MsgSaveVerificationMethods struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Signature []byte                           `protobuf:"bytes,1,opt,name=signature,proto3" json:"signature,omitempty"`
-	Data      *MsgSaveVerificationMethods_Data `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	// The signature of the data.
+	Signature []byte `protobuf:"bytes,1,opt,name=signature,proto3" json:"signature,omitempty"`
+	// The verification methods data.
+	Data *MsgSaveVerificationMethods_Data `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *MsgSaveVerificationMethods) Reset() {
@@ -467,6 +492,8 @@ func (x *MsgSaveVerificationMethods) GetData() *MsgSaveVerificationMethods_Data 
 	return nil
 }
 
+// SaveVerificationMethodsResponse is the response payload for saving verification methods.
+// Currently empty but can be expanded in future iterations.
 type SaveVerificationMethodsResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -505,14 +532,18 @@ func (*SaveVerificationMethodsResponse) Descriptor() ([]byte, []int) {
 	return file_v1_diddoc_service_proto_rawDescGZIP(), []int{9}
 }
 
+// Nested message representing data of the metadata.
 type SaveMetadataRequest_Data struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Did                 string    `protobuf:"bytes,1,opt,name=did,proto3" json:"did,omitempty"`
-	Objects             []*Object `protobuf:"bytes,2,rep,name=objects,proto3" json:"objects,omitempty"`
-	AuthenticationKeyId string    `protobuf:"bytes,3,opt,name=authentication_key_id,json=authenticationKeyId,proto3" json:"authentication_key_id,omitempty"`
+	// OBADA decentralized identifier of the DID document.
+	Did string `protobuf:"bytes,1,opt,name=did,proto3" json:"did,omitempty"`
+	// Array of objects representing the metadata.
+	Objects []*Object `protobuf:"bytes,2,rep,name=objects,proto3" json:"objects,omitempty"`
+	// The identifier of the authentication key.
+	AuthenticationKeyId string `protobuf:"bytes,3,opt,name=authentication_key_id,json=authenticationKeyId,proto3" json:"authentication_key_id,omitempty"`
 }
 
 func (x *SaveMetadataRequest_Data) Reset() {
@@ -568,15 +599,20 @@ func (x *SaveMetadataRequest_Data) GetAuthenticationKeyId() string {
 	return ""
 }
 
+// Nested message representing the data of the verification methods.
 type MsgSaveVerificationMethods_Data struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Did                 string                `protobuf:"bytes,1,opt,name=did,proto3" json:"did,omitempty"`
+	// The decentralized identifier of the DID document.
+	Did string `protobuf:"bytes,1,opt,name=did,proto3" json:"did,omitempty"`
+	// Array of VerificationMethod objects representing the verification methods.
 	VerificationMethods []*VerificationMethod `protobuf:"bytes,2,rep,name=verification_methods,json=verificationMethods,proto3" json:"verification_methods,omitempty"`
-	Authentication      []string              `protobuf:"bytes,3,rep,name=authentication,proto3" json:"authentication,omitempty"`
-	AuthenticationKeyId string                `protobuf:"bytes,4,opt,name=authentication_key_id,json=authenticationKeyId,proto3" json:"authentication_key_id,omitempty"`
+	// List of identifiers used for authentication.
+	Authentication []string `protobuf:"bytes,3,rep,name=authentication,proto3" json:"authentication,omitempty"`
+	// The identifier of the authentication key.
+	AuthenticationKeyId string `protobuf:"bytes,4,opt,name=authentication_key_id,json=authenticationKeyId,proto3" json:"authentication_key_id,omitempty"`
 }
 
 func (x *MsgSaveVerificationMethods_Data) Reset() {

@@ -22,10 +22,15 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DIDDocClient interface {
+	// Register allows the registration of a new DID document in the registry.
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+	// Get allows the retrieval of a DID document given its identifier.
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
+	// GetMetadataHistory allows the retrieval of the metadata history of a DID document.
 	GetMetadataHistory(ctx context.Context, in *GetMetadataHistoryRequest, opts ...grpc.CallOption) (*GetMetadataHistoryResponse, error)
+	// SaveMetadata allows storing metadata related to a DID document.
 	SaveMetadata(ctx context.Context, in *SaveMetadataRequest, opts ...grpc.CallOption) (*SaveMetadataResponse, error)
+	// SaveVerificationMethods allows storing verification methods associated with a DID document.
 	SaveVerificationMethods(ctx context.Context, in *MsgSaveVerificationMethods, opts ...grpc.CallOption) (*SaveVerificationMethodsResponse, error)
 }
 
@@ -86,10 +91,15 @@ func (c *dIDDocClient) SaveVerificationMethods(ctx context.Context, in *MsgSaveV
 // All implementations must embed UnimplementedDIDDocServer
 // for forward compatibility
 type DIDDocServer interface {
+	// Register allows the registration of a new DID document in the registry.
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
+	// Get allows the retrieval of a DID document given its identifier.
 	Get(context.Context, *GetRequest) (*GetResponse, error)
+	// GetMetadataHistory allows the retrieval of the metadata history of a DID document.
 	GetMetadataHistory(context.Context, *GetMetadataHistoryRequest) (*GetMetadataHistoryResponse, error)
+	// SaveMetadata allows storing metadata related to a DID document.
 	SaveMetadata(context.Context, *SaveMetadataRequest) (*SaveMetadataResponse, error)
+	// SaveVerificationMethods allows storing verification methods associated with a DID document.
 	SaveVerificationMethods(context.Context, *MsgSaveVerificationMethods) (*SaveVerificationMethodsResponse, error)
 	mustEmbedUnimplementedDIDDocServer()
 }

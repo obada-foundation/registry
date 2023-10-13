@@ -1,4 +1,6 @@
 syntax = "proto3";
+
+// Package v1.diddoc defines the version 1 of the DID document service API.
 package v1.diddoc;
 
 option go_package = "github.com/obada-foundation/registry/services/v1/diddoc";
@@ -7,61 +9,107 @@ import "google/api/annotations.proto";
 import "v1/diddoc/did_document.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
+// RegisterRequest is the payload for requesting the registration of a new DID document.
 message RegisterRequest {
+  // The decentralized identifier for the DID document to be registered.
   string did = 1;
+
+  // Methods used to verify that the DID subject agrees with the DID document.
   repeated VerificationMethod verification_method = 2;
+
+  // List of identifiers used for authentication.
   repeated string authentication = 3;
+
+  // Service endpoints related to the DID.
   repeated Service service = 4;
 }
 
+// RegisterResponse is the response payload for the registration request.
+// Currently empty but can be expanded in future iterations.
 message RegisterResponse {}
 
+// GetRequest is used to request a DID document using its identifier.
 message GetRequest {
+  // The decentralized identifier of the DID document to retrieve.
   string did = 1;
 }
 
+// GetResponse contains the DID document associated with the provided identifier.
 message GetResponse {
+  // The DID document corresponding to the requested identifier.
   DIDDocument document = 1;
 }
 
+// GetMetadataHistoryRequest is used to request the history of metadata of a DID document.
 message GetMetadataHistoryRequest {
+  // The decentralized identifier of the DID document whose history is requested.
   string did = 1;
 }
 
+// GetMetadataHistoryResponse contains the history of metadata changes of the DID document.
 message GetMetadataHistoryResponse {
+  // Map containing the history of metadata changes. The key is a timestamp and the value is a DataArray object representing the changes at that time.
   map<int32, DataArray> metadata_history = 1;
 }
 
+// SaveMetadataRequest is used to store metadata related to a DID document.
 message SaveMetadataRequest {
+  // Nested message representing data of the metadata.
   message Data {
+    // OBADA decentralized identifier of the DID document.
     string did = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-    field_configuration: {path_param_name: "did"},
-  }];
+	field_configuration: {path_param_name: "did"},
+    }];
+    // Array of objects representing the metadata.
     repeated Object objects = 2;
+
+    // The identifier of the authentication key.
     string authentication_key_id = 3;
   }
+
+  // The signature of the data.
   bytes signature = 1;
+
+  // The metadata records
   Data data = 2;
 }
 
+// SaveMetadataResponse is the response payload after attempting to save metadata.
+// Currently empty but can be expanded in future iterations.
 message SaveMetadataResponse {}
 
+// MsgSaveVerificationMethods represents a request to store verification methods.
 message MsgSaveVerificationMethods {
+  // Nested message representing the data of the verification methods.
   message Data {
+    // The decentralized identifier of the DID document.
     string did = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-    field_configuration: {path_param_name: "did"},
-  }];
+	field_configuration: {path_param_name: "did"},
+    }];
+    
+    // Array of VerificationMethod objects representing the verification methods.
     repeated VerificationMethod verification_methods = 2;
+
+    // List of identifiers used for authentication.
     repeated string authentication = 3;
+
+    // The identifier of the authentication key.
     string authentication_key_id = 4;
   }
+  // The signature of the data.
   bytes signature = 1;
+
+  // The verification methods data.
   Data data = 2;
 }
 
+// SaveVerificationMethodsResponse is the response payload for saving verification methods.
+// Currently empty but can be expanded in future iterations.
 message SaveVerificationMethodsResponse {}
 
+// Service DIDDoc provides RPC methods related to DID document functionalities, including registration, retrieval, metadata history retrieval, metadata saving, and verification methods saving.
 service DIDDoc {
+  // Register allows the registration of a new DID document in the registry.
   rpc Register (RegisterRequest) returns (RegisterResponse) {
     option (google.api.http) = {
       post: "/api/v1.0/diddoc/register"
@@ -69,18 +117,21 @@ service DIDDoc {
     };
   }
 
+  // Get allows the retrieval of a DID document given its identifier.
   rpc Get (GetRequest) returns (GetResponse) {
     option (google.api.http) = {
       get: "/api/v1.0/diddoc/{did}"
     };
   }
 
+  // GetMetadataHistory allows the retrieval of the metadata history of a DID document.
   rpc GetMetadataHistory (GetMetadataHistoryRequest) returns (GetMetadataHistoryResponse) {
     option (google.api.http) = {
       get: "/api/v1.0/diddoc/{did}/history"
     };
   }
 
+  // SaveMetadata allows storing metadata related to a DID document.
   rpc SaveMetadata (SaveMetadataRequest) returns (SaveMetadataResponse) {
     option (google.api.http) = {
       post: "/api/v1.0/diddoc/{data.did}/metadata"
@@ -88,6 +139,7 @@ service DIDDoc {
     };
   }
 
+  // SaveVerificationMethods allows storing verification methods associated with a DID document.
   rpc SaveVerificationMethods(MsgSaveVerificationMethods) returns (SaveVerificationMethodsResponse) {
     option (google.api.http) = {
       post: "/api/v1.0/diddoc/{data.did}/verification-methods"
