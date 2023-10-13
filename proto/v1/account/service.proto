@@ -21,6 +21,7 @@ message GetPublicKeyResponse {
 }
 
 service Account {
+  // RegisterAccount RPC method allows a user to register an OBADA blockchain account.
   rpc RegisterAccount (RegisterAccountRequest) returns (RegisterAccountResponse) {
     option (google.api.http) = {
       post: "/api/v1.0/accounts/register"
@@ -28,6 +29,7 @@ service Account {
     };
   }
 
+  // The GetPublicKey RPC method allows a client to query the public key associated with a given blockchain address.
   rpc GetPublicKey (GetPublicKeyRequest) returns (GetPublicKeyResponse) {
     option (google.api.http) = {
       get: "/api/v1.0/accounts/{address}"
